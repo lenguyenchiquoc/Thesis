@@ -4,7 +4,8 @@ import asyncio
 from Scanner.har_loader import HarLoader
 from Scanner.browser_automated_scan import BrowserScanner
 from Output.save_output import save_output_file_type
-from Input.input import InputLoader
+from Input.input_loader import InputLoader
+from Analyze.postfiltered import VectorFiltering
 VERSION = "2025.1.0.0"
 
 def main():
@@ -94,6 +95,10 @@ def handle_arg(args):
         if args.input:
             reader = InputLoader(args.input)
             file_read = reader.load()
+            print(file_read)
+            vector_filtered = VectorFiltering(file_read)
+            print("/n")
+            print(f" Filter is {vector_filtered.filter()}")
         if args.output:
             save_output_file_type(
                 vectors=results,

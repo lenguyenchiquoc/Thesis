@@ -11,7 +11,7 @@ class InputLoader:
     def load(self):
         if not os.path.exists(self.file_path):
             raise FileNotFoundError(f"File is not found at {self.file_path}!")
-        if not self.file_path.endswith('json'):
+        if not self.file_path.endswith('.json'):
             raise ValueError("Wrong file type!")
         with open(self.file_path, "r", encoding="utf-8") as f:
             data = json.load(f)

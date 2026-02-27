@@ -1,55 +1,119 @@
 {
-    "metadata": {
-        "tool": "ethicalQuoc",
-        "version": "2025.1.0.0",
-        "scan_type": "Hybrid",
-        "phase": "scan",
-        "target": "results/result.json",
-        "timestamp": "2026-02-26T06:33:54.025331"
+  "metadata": {
+    "tool": "ethicalQuoc",
+    "version": "2025.1.0.0",
+    "scan_type": "Hybrid",
+    "phase": "scan",
+    "target": "results/result.json",
+    "timestamp": "2026-02-26T06:33:54.025331"
+  },
+  "summary": {
+    "total_vectors": 5
+  },
+  "vectors": [
+    {
+      "source": "browser",
+      "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+      "method": "GET",
+      "location": "header",
+      "name": "upgrade-insecure-requests",
+      "value": "1"
     },
-    "summary": {
-        "total_vectors": 5
+    {
+      "source": "browser",
+      "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+      "method": "GET",
+      "location": "header",
+      "name": "user-agent",
+      "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
     },
-    "vectors": [
-        {
-            "source": "browser",
-            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
-            "method": "GET",
-            "location": "header",
-            "name": "upgrade-insecure-requests",
-            "value": "1"
-        },
-        {
-            "source": "browser",
-            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
-            "method": "GET",
-            "location": "header",
-            "name": "user-agent",
-            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
-        },
-        {
-            "source": "browser",
-            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
-            "method": "GET",
-            "location": "header",
-            "name": "sec-ch-ua",
-            "value": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\""
-        },
-        {
-            "source": "browser",
-            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
-            "method": "GET",
-            "location": "header",
-            "name": "sec-ch-ua-mobile",
-            "value": "?0"
-        },
-        {
-            "source": "browser",
-            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
-            "method": "GET",
-            "location": "header",
-            "name": "sec-ch-ua-platform",
-            "value": "\"Windows\""
-        }
-    ]
+    {
+      "source": "browser",
+      "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+      "method": "GET",
+      "location": "header",
+      "name": "sec-ch-ua",
+      "value": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\""
+    },
+    {
+      "source": "browser",
+      "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+      "method": "GET",
+      "location": "header",
+      "name": "sec-ch-ua-mobile",
+      "value": "?0"
+    },
+    {
+      "source":"browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "cookie",
+      "name": "session",
+      "value": "Tzo0OiJVc2VyIjozOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJyODYwN2ZpNmFrNWY2N3RlbnVjNHVubTNpaTFrOXQ4dyI7czoxMToiYXZhdGFyX2xpbmsiO3M6MTk6InVzZXJzL3dpZW5lci9hdmF0YXIiO30%3d"
+    },
+    {
+      "source": "browser",
+      "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+      "method": "GET",
+      "location": "header",
+      "name": "sec-ch-ua-platform",
+      "value": "\"Windows\""
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": ":path",
+      "value": "/logout"
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": ":scheme",
+      "value": "https"
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": "accept",
+      "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": "accept-encoding",
+      "value": "gzip, deflate, br, zstd"
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": "accept-language",
+      "value": "en-US,en;q=0.9,vi;q=0.8"
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": "cache-control",
+      "value": "no-cache"
+    },
+    {
+      "source": "browser",
+      "url": "https://0ac10016031966788071e9c9007000ad.web-security-academy.net/logout",
+      "method": "GET",
+      "location": "header",
+      "name": "cookie",
+      "value": "session=Tzo0OiJVc2VyIjozOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJyODYwN2ZpNmFrNWY2N3RlbnVjNHVubTNpaTFrOXQ4dyI7czoxMToiYXZhdGFyX2xpbmsiO3M6MTk6InVzZXJzL3dpZW5lci9hdmF0YXIiO30%3d"
+    }
+  ]
 }
