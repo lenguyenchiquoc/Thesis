@@ -4,7 +4,7 @@ import asyncio
 from Scanner.har_loader import HarLoader
 from Scanner.browser_automated_scan import BrowserScanner
 from Output.save_output import save_output_file_type
-
+from Input.input import InputLoader
 VERSION = "2025.1.0.0"
 
 def main():
@@ -91,6 +91,9 @@ def handle_arg(args):
 
         results = {"status": "analyze placeholder"}
 
+        if args.input:
+            reader = InputLoader(args.input)
+            file_read = reader.load()
         if args.output:
             save_output_file_type(
                 vectors=results,
