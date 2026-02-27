@@ -1,0 +1,55 @@
+{
+    "metadata": {
+        "tool": "ethicalQuoc",
+        "version": "2025.1.0.0",
+        "scan_type": "Hybrid",
+        "phase": "scan",
+        "target": "results/result.json",
+        "timestamp": "2026-02-26T06:33:54.025331"
+    },
+    "summary": {
+        "total_vectors": 5
+    },
+    "vectors": [
+        {
+            "source": "browser",
+            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+            "method": "GET",
+            "location": "header",
+            "name": "upgrade-insecure-requests",
+            "value": "1"
+        },
+        {
+            "source": "browser",
+            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+            "method": "GET",
+            "location": "header",
+            "name": "user-agent",
+            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36"
+        },
+        {
+            "source": "browser",
+            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-ch-ua",
+            "value": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\""
+        },
+        {
+            "source": "browser",
+            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-ch-ua-mobile",
+            "value": "?0"
+        },
+        {
+            "source": "browser",
+            "url": "https://0a50008604b6790e8124e48a009e00f7.web-security-academy.net/",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-ch-ua-platform",
+            "value": "\"Windows\""
+        }
+    ]
+}

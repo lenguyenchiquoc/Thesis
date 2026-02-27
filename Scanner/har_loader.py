@@ -2,99 +2,73 @@ import json
 import os
 from urllib.parse import urlparse
 
-def parse_har(file_path):
 
-    ignore_ext = {"jpg", "jpeg", "png", "gif", "css", "js", "svg", "mp4", "mp3"}
-    vectors = []
+class HarLoader:
 
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            har_data = json.load(f)
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.ignore_ext = {"jpg", "jpeg", "png", "gif", "css", "js", "svg", "mp4", "mp3"}
+        self.vectors = []
+        self.target_name = None
 
-        entries = har_data['log']['entries']
-        if not entries:
-            print("[!] HAR file empty")
+    def parse(self):
+        try:
+            with open(self.file_path, 'r', encoding='utf-8') as f:
+                har_data = json.load(f)
+
+            entries = har_data['log']['entries']
+            if not entries:
+                print("[!] HAR file empty")
+                return []
+
+            first_url = entries[0]['request']['url']
+            self.target_name = urlparse(first_url).netloc
+
+            for entry in entries:
+                self._process_entry(entry)
+
+            print(f"[+] Passive Scan: Extracted {len(self.vectors)} vectors")
+            return self.vectors
+
+        except Exception as e:
+            print(f"[!] HAR Parsing failed: {e}")
             return []
 
-        first_url = entries[0]['request']['url']
-        targetname = urlparse(first_url).netloc
-        os.makedirs("results", exist_ok=True)
-        output_file = f"results/{targetname}_scanner.json"
+    def _process_entry(self, entry):
+        req = entry['request']
+        url = req['url']
 
-        for entry in entries:
-            req = entry['request']
-            url = req['url']
+        path = urlparse(url).path
+        ext = path.split('.')[-1].lower()
+        if ext in self.ignore_ext:
+            return
 
-            path = urlparse(url).path
-            ext = path.split('.')[-1].lower()
-            if ext in ignore_ext:
-                continue
+        for param in req.get('queryString', []):
+            self._add_vector(url, req['method'], "url_param", param['name'], param['value'])
 
-            for param in req.get('queryString', []):
-                vectors.append({
-                    "url": url,
-                    "method": req['method'],
-                    "location": "url_param",
-                    "name": param['name'],
-                    "value": param['value']
-                })
+  
+        for cookie in req.get('cookies', []):
+            self._add_vector(url, req['method'], "cookie", cookie['name'], cookie['value'])
 
-            for cookie in req.get('cookies', []):
-                vectors.append({
-                    "url": url,
-                    "method": req['method'],
-                    "location": "cookie",
-                    "name": cookie['name'],
-                    "value": cookie['value']
-                })
+        for header in req.get('headers', []):
+            self._add_vector(url, req['method'], "header", header['name'], header['value'])
 
-            for header in req.get('headers', []):
-                vectors.append({
-                    "url": url,
-                    "method": req['method'],
-                    "location": "header",
-                    "name": header['name'],
-                    "value": header['value']
-                })
+        post_data = req.get('postData', {})
 
-            post_data = req.get('postData', {})
+        if 'params' in post_data:
+            for p in post_data['params']:
+                self._add_vector(url, req['method'], "form_body", p['name'], p['value'])
 
-            if 'params' in post_data:
-                for p in post_data['params']:
-                    vectors.append({
-                        "url": url,
-                        "method": req['method'],
-                        "location": "form_body",
-                        "name": p['name'],
-                        "value": p['value']
-                    })
+        elif 'text' in post_data:
+            self._add_vector(url, req['method'], "raw_body", "payload", post_data['text'])
 
-            elif 'text' in post_data:
-                vectors.append({
-                    "url": url,
-                    "method": req['method'],
-                    "location": "raw_body",
-                    "name": "payload",
-                    "value": post_data['text']
-                })
-
-        print(f"[+] Passive Scan: Extracted {len(vectors)} vectors from HAR")
-
-        return output_json(vectors, targetname, output_file)
-
-    except Exception as e:
-        print(f"[!] HAR Parsing failed: {e} or file/path/directory is not found")
-        return []
-    
-def output_json(vectors, target_name, output_file):
-    results = {
-        "target": target_name,
-        "scan_type": "hybrid",
-        "vector_count": len(vectors),
-        "vectors": vectors
-    }
-    with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(results, f, indent=4, ensure_ascii=False)
-                print(f"[+] Output saved to {output_file}")
-    return results
+    def _add_vector(self, url, method, location, name, value):
+        self.vectors.append({
+            "source": "har",
+            "url": url,
+            "method": method,
+            "location": location,
+            "name": name,
+            "value": value
+        })
     

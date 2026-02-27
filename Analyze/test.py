@@ -1,0 +1,8 @@
+from normalize import DataNormalizer
+value = "Tzo0OiJVc2VyIjozOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJyODYwN2ZpNmFrNWY2N3RlbnVjNHVubTNpaTFrOXQ4dyI7czoxMToiYXZhdGFyX2xpbmsiO3M6MTk6InVzZXJzL3dpZW5lci9hdmF0YXIiO30"
+decode = DataNormalizer(value, max_depth = 12)
+candidate = decode.normalize()
+print(candidate)
+
+
+
