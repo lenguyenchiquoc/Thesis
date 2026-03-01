@@ -1,5 +1,8 @@
 from normalize import DataNormalizer
-value = "Tzo0OiJVc2VyIjozOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czoxMjoiYWNjZXNzX3Rva2VuIjtzOjMyOiJyODYwN2ZpNmFrNWY2N3RlbnVjNHVubTNpaTFrOXQ4dyI7czoxMToiYXZhdGFyX2xpbmsiO3M6MTk6InVzZXJzL3dpZW5lci9hdmF0YXIiO30"
+import base64
+value = "rO0ABXNyABdqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHABwAAAAAEwAHhwdAAIZ2FkZ2V0cw=="
+ecoded_bytes = base64.b64decode(value)
+print(ecoded_bytes)
 decode = DataNormalizer(value, max_depth = 12)
 candidate = decode.normalize()
 print(candidate)

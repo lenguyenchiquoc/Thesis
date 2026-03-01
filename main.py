@@ -6,6 +6,8 @@ from Scanner.browser_automated_scan import BrowserScanner
 from Output.save_output import save_output_file_type
 from Input.input_loader import InputLoader
 from Analyze.postfiltered import VectorFiltering
+from Analyze.normalize import DataNormalizer
+from Analyze.cleanfilter import cleanfilter
 VERSION = "2025.1.0.0"
 
 def main():
@@ -95,10 +97,17 @@ def handle_arg(args):
         if args.input:
             reader = InputLoader(args.input)
             file_read = reader.load()
-            print(file_read)
             vector_filtered = VectorFiltering(file_read)
             print("/n")
-            print(f" Filter is {vector_filtered.filter()}")
+            vector_filtered_list = vector_filtered.filter()
+            print(f" Filter is {vector_filtered_list}")
+            clean_filter = cleanfilter(vector_filtered_list)
+            clean_filter.clean_and_output()
+            for i in clean_filter._clean_all():
+                value = i["cleaned_value"]
+                value_normalize = DataNormalizer(value).normalize()
+                print(f"Normalize is: {value_normalize}")
+                
         if args.output:
             save_output_file_type(
                 vectors=results,
