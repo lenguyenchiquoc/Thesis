@@ -61,7 +61,7 @@ class VectorFiltering:
             location = vector.get("location")
             name = vector.get("name", "").lower()
             value = vector.get("value")
-            if not isinstance(value, str):
+            if not isinstance(value, str) and not value.strip():
                 continue
             if location not in ["cookie", "body", "header", "query", "form_body", "url_param"]:
                 continue
@@ -71,8 +71,7 @@ class VectorFiltering:
                 filtered.append(vector)
                 continue
             if self._look_maybe_suspicious(value):
-                filtered.append(vector)
-        
+                filtered.append(vector) 
         return filtered
     
     def _look_maybe_suspicious(self, value: str) -> bool:
@@ -88,19 +87,22 @@ class VectorFiltering:
             decoded_value = value
             decoded_lower = value_lower
 
+        #Base64
         if re.search(r'(?i)[Oaidsb]:\d+:', value) or re.search(r'(?i)[Oaidsb]:\d+:', decoded_value):
             return True
         if re.search(r'(?i)Tzo[0-9]+[A-Za-z0-9+/=]*', value) or re.search(r'(?i)Tzo[0-9]+[A-Za-z0-9+/=]*', decoded_value):
             return True
 
+        #Java
         if value.startswith("rO0") or "rO0AB" in value or value.startswith("ACED") or "ACED" in value.upper():
             return True
         if "ysoserial" in decoded_lower or "commonscollections" in decoded_lower or "urlclassloader" in decoded_lower or "templatesimpl" in decoded_lower:
             return True
-
+        #Yaml
         if any(y in value for y in ["!!", "!<!", "%YAML", "!<tag:yaml.org"]):
             return True
 
+        #Gadget chain
         if value.startswith(("{", "[")) and len(value) > 100:
             if any(k in decoded_lower for k in ["__class__", "__wakeup", "__destruct", "java.lang", "java.util", "gadget", "phar"]):
                 return True

@@ -682,6 +682,270 @@
       "location": "header",
       "name": "x-api-key",
       "value": "sk_live_1234567890abcdef"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/login",
+    "method": "POST",
+    "location": "form_body",
+    "name": "username",
+    "value": "admin123"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/login",
+    "method": "POST",
+    "location": "form_body",
+    "name": "password",
+    "value": "secretpass"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/api/user",
+    "method": "GET",
+    "location": "query",
+    "name": "id",
+    "value": "12345"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/session",
+    "method": "GET",
+    "location": "cookie",
+    "name": "session",
+    "value": "abcde12345"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/auth",
+    "method": "POST",
+    "location": "header",
+    "name": "Authorization",
+    "value": "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/php-serialized",
+    "method": "POST",
+    "location": "cookie",
+    "name": "session",
+    "value": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3d"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/java-serialized",
+    "method": "POST",
+    "location": "body",
+    "name": "payload",
+    "value": "rO0ABXNyABdqYXZhLnV0aWwuQXJyYXlMaXN0eIHSHZnHYZ0DAAFJAARzaXpleHABwAAAAAEwAHhwdAAIZ2FkZ2V0cw=="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/java-binary-preview",
+    "method": "GET",
+    "location": "cookie",
+    "name": "jsessionid",
+    "value": "rO0ABXNyAB5jb20uc3VuLm9yZy5hcGFjaGUuY29tbW9ucy5jb2xsZWN0aW9ucy4uLg=="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/yaml-gadget",
+    "method": "POST",
+    "location": "body",
+    "name": "config",
+    "value": "!!python/object/apply:os.system ['id']"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/yaml-encoded",
+    "method": "GET",
+    "location": "query",
+    "name": "payload",
+    "value": "JSEheWFtbC4xLjEKISEhcHl0aG9uL29iamVjdC9hcHBseTpvcy5zeXN0ZW0gWydjYWxjLmV4ZSdd"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/python-pickle",
+    "method": "POST",
+    "location": "body",
+    "name": "state",
+    "value": "Y29zc2lzCgRzeXN0ZW0KcA0KKBAnY2FsYy5leGUnCnAxCnQKUi4="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/python-pickle-text",
+    "method": "GET",
+    "location": "cookie",
+    "name": "pickle_data",
+    "value": "cposix\nsystem\np0\n('id')\np1\n."
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/ruby-marshal",
+    "method": "POST",
+    "location": "header",
+    "name": "marshal_token",
+    "value": "BAdzOmlAY2xhc3M6OnN0cmluZzowCg=="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/dotnet-serialized",
+    "method": "GET",
+    "location": "cookie",
+    "name": "dotnetsess",
+    "value": "AQAAAAMAAAAgAAAA... (binary base64)"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/hex-long",
+    "method": "POST",
+    "location": "body",
+    "name": "hash",
+    "value": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/entropy-high",
+    "method": "GET",
+    "location": "query",
+    "name": "token",
+    "value": "Z3V1aW9wYXNka2xmZ2hqa3Nsb25tYXBvdHJld2lkb25hc3Bva3Nka2ZnamhnbG1u"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/random-normal",
+    "method": "POST",
+    "location": "form_body",
+    "name": "message",
+    "value": "This is a normal message without serialization."
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/jwt",
+    "method": "GET",
+    "location": "header",
+    "name": "Authorization",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/phar-exploit",
+    "method": "POST",
+    "location": "body",
+    "name": "file",
+    "value": "phar://./upload/shell.phar"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/gopher-ssrf",
+    "method": "GET",
+    "location": "query",
+    "name": "url",
+    "value": "gopher://127.0.0.1:6379/_SET key value"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/xxe",
+    "method": "POST",
+    "location": "body",
+    "name": "xml",
+    "value": "]><foo>&xxe;</foo>"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/sql-injection",
+    "method": "GET",
+    "location": "query",
+    "name": "id",
+    "value": "1' OR '1'='1"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/xss",
+    "method": "POST",
+    "location": "form_body",
+    "name": "comment",
+    "value": "<script>alert('XSS')</script>"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/csrf-token",
+    "method": "GET",
+    "location": "header",
+    "name": "X-CSRF-Token",
+    "value": "randomcsrf1234567890"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/api-key",
+    "method": "GET",
+    "location": "header",
+    "name": "X-API-Key",
+    "value": "apikey-1234567890abcdef"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/user-agent",
+    "method": "GET",
+    "location": "header",
+    "name": "User-Agent",
+    "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/url-param",
+    "method": "GET",
+    "location": "url_param",
+    "name": "id",
+    "value": "user123"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/multipart-file",
+    "method": "POST",
+    "location": "body",
+    "name": "file",
+    "value": "base64_encoded_file_content"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/long-base64",
+    "method": "GET",
+    "location": "cookie",
+    "name": "long_token",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c_long_extension_with_more_data=="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/url-encoded-serialized",
+    "method": "POST",
+    "location": "form_body",
+    "name": "serialized",
+    "value": "O%3A4%3A%22User%22%3A2%3A%7Bs%3A8%3A%22username%22%3Bs%3A6%3A%22wiener%22%3Bs%3A5%3A%22admin%22%3Bb%3A1%3B%7D"
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/gzip-compressed",
+    "method": "POST",
+    "location": "body",
+    "name": "compressed",
+    "value": "H4sIAAAAAAAA/0tMSU1NL0pNyc9NzMxITUzOSc3NL0ksyUxO0c3JLMkM0fHQAi2Xw1VAAAA=="
+    },
+    {
+    "source": "har",
+    "url": "https://example.com/double-encoded",
+    "method": "GET",
+    "location": "query",
+    "name": "double",
+    "value": "JTNDc2NyaXB0JTNFYWxlcnQlMjglMjdYU1MlMjclMjklM0UlM0Mvc2NyaXB0JTNF"  
+    },
+    {
+      "source": "har",
+      "url": "https://example.com/mixed-serialized",
+      "method": "POST",
+      "location": "header",
+      "name": "custom_serial",
+      "value": "session= O:8:\"stdClass\":1:{s:4:\"role\";s:5:\"admin\";}"
     }
   ]
 }
