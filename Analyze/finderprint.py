@@ -69,8 +69,7 @@ class Fingerprint:
         risk_level = "Low"
         detected_type = "Unknown"
         subtype = None
-        gadget_detected = False
- 
+        gadget_detected = False    
         
         if any(re.search(pattern, text) for pattern in self.PHP_PATTERNS):
             detected_type = "PHP"
@@ -118,6 +117,7 @@ class Fingerprint:
 
 
         return {
+            "value": " ".join(self.data),
             "type": detected_type,
             "confidence": confidence,
             "risk_level": risk_level,
