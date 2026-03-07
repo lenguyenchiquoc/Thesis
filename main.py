@@ -10,6 +10,7 @@ from Analyze.normalize import DataNormalizer
 from Analyze.cleanfilter import cleanfilter
 from Analyze.finderprint import Fingerprint
 import json
+from Analyze.ExploitabilityAnalysis import ExploitAnalyze
 VERSION = "2025.1.0.0"
 
 def main():
@@ -111,7 +112,10 @@ def handle_arg(args):
                 value_normalize = DataNormalizer(value).normalize()
                 print(f"Normalize is: {value_normalize}")
                 normalize_output.append(value_normalize)
-                print(json.dumps(Fingerprint(value_normalize).fingerprint_serial(), indent=4, ensure_ascii=False))
+                fingerprint = Fingerprint(value_normalize).fingerprint_serial()
+                print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
+                exploitAnalyze = ExploitAnalyze(fingerprint).exploitAnalyze()
+                print(exploitAnalyze)
             
         if args.output:
             save_output_file_type(
