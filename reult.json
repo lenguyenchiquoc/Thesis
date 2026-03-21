@@ -1,0 +1,503 @@
+{
+    "metadata": {
+        "tool": "ethicalQuoc",
+        "version": "2025.1.0.0",
+        "scan_type": "Hybrid",
+        "phase": "scan",
+        "target": "reult.json",
+        "timestamp": "2026-03-13T03:36:19.398638"
+    },
+    "summary": {
+        "total_vectors": 61
+    },
+    "vectors": [
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "cookie",
+            "name": "session",
+            "value": ""
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": ":authority",
+            "value": "0a8e001d038e51c28230dddf008200f1.web-security-academy.net"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": ":method",
+            "value": "POST"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": ":path",
+            "value": "/login"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": ":scheme",
+            "value": "https"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "accept",
+            "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "accept-encoding",
+            "value": "gzip, deflate, br, zstd"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "accept-language",
+            "value": "en-US,en;q=0.9"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "cache-control",
+            "value": "max-age=0"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "content-length",
+            "value": "30"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "content-type",
+            "value": "application/x-www-form-urlencoded"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "cookie",
+            "value": "session="
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "origin",
+            "value": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "priority",
+            "value": "u=0, i"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "referer",
+            "value": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-ch-ua",
+            "value": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\""
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-ch-ua-mobile",
+            "value": "?0"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-ch-ua-platform",
+            "value": "\"Windows\""
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-fetch-dest",
+            "value": "document"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-fetch-mode",
+            "value": "navigate"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-fetch-site",
+            "value": "same-origin"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "sec-fetch-user",
+            "value": "?1"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "upgrade-insecure-requests",
+            "value": "1"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "header",
+            "name": "user-agent",
+            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "form_body",
+            "name": "username",
+            "value": "wiener"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login",
+            "method": "POST",
+            "location": "form_body",
+            "name": "password",
+            "value": "peter"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "url_param",
+            "name": "id",
+            "value": "wiener"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "value": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30%3d"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": ":authority",
+            "value": "0a8e001d038e51c28230dddf008200f1.web-security-academy.net"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": ":method",
+            "value": "GET"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": ":path",
+            "value": "/my-account?id=wiener"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": ":scheme",
+            "value": "https"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "accept",
+            "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "accept-encoding",
+            "value": "gzip, deflate, br, zstd"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "accept-language",
+            "value": "en-US,en;q=0.9"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "cache-control",
+            "value": "max-age=0"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "cookie",
+            "value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30%3d"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "priority",
+            "value": "u=0, i"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "referer",
+            "value": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/login"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-ch-ua",
+            "value": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\""
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-ch-ua-mobile",
+            "value": "?0"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-ch-ua-platform",
+            "value": "\"Windows\""
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-fetch-dest",
+            "value": "document"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-fetch-mode",
+            "value": "navigate"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-fetch-site",
+            "value": "same-origin"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "sec-fetch-user",
+            "value": "?1"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "upgrade-insecure-requests",
+            "value": "1"
+        },
+        {
+            "source": "har",
+            "url": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/my-account?id=wiener",
+            "method": "GET",
+            "location": "header",
+            "name": "user-agent",
+            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Upgrade",
+            "value": "websocket"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Origin",
+            "value": "https://0a8e001d038e51c28230dddf008200f1.web-security-academy.net"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Cache-Control",
+            "value": "no-cache"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Accept-Language",
+            "value": "en-US,en;q=0.9"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Pragma",
+            "value": "no-cache"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Cookie",
+            "value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30%3d"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Connection",
+            "value": "Upgrade"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Sec-WebSocket-Key",
+            "value": "BTh7WY1ITNYZIw4tjkzI2g=="
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Accept-Encoding",
+            "value": "gzip, deflate, br, zstd"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "User-Agent",
+            "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Sec-WebSocket-Version",
+            "value": "13"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Host",
+            "value": "0a8e001d038e51c28230dddf008200f1.web-security-academy.net"
+        },
+        {
+            "source": "har",
+            "url": "wss://0a8e001d038e51c28230dddf008200f1.web-security-academy.net/academyLabHeader",
+            "method": "GET",
+            "location": "header",
+            "name": "Sec-WebSocket-Extensions",
+            "value": "permessage-deflate; client_max_window_bits"
+        }
+    ]
+}
