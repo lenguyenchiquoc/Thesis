@@ -114,9 +114,6 @@ def handle_arg(args):
                 normalize_output.append(value_normalize)
                 fingerprint = Fingerprint(value_normalize).fingerprint_serial()
                 print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
-                exploitAnalyze = ExploitAnalyze(fingerprint).exploitAnalyze()
-                print(exploitAnalyze)
-            
         if args.output:
             save_output_file_type(
                 vectors=results,
