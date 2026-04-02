@@ -11,6 +11,7 @@ from Analyze.cleanfilter import cleanfilter
 from Analyze.finderprint import Fingerprint
 import json
 from Analyze.ExploitabilityAnalysis import ExploitAnalyze
+from Analyze.payloadMutation import PayloadMutation
 VERSION = "2025.1.0.0"
 
 def main():
@@ -114,7 +115,10 @@ def handle_arg(args):
                 normalize_output.append(value_normalize)
                 fingerprint = Fingerprint(value_normalize).fingerprint_serial()
                 print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
-                print(json.dumps(ExploitAnalyze(fingerprint).analyze(), indent=4, ensure_ascii=False))
+                ExploitAnalyze_rs = ExploitAnalyze(fingerprint).analyze()
+                print(json.dumps(ExploitAnalyze_rs, indent=4, ensure_ascii=False))
+                mutations_java = PayloadMutation(ExploitAnalyze_rs,fingerprint).mutate()
+                print(mutations_java)
         if args.output:
             save_output_file_type(
                 vectors=results,
