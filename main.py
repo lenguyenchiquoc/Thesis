@@ -1,5 +1,11 @@
 import argparse
 import asyncio
+import io
+import sys
+
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 from Scanner.har_loader import HarLoader
 from Scanner.browser_automated_scan import BrowserScanner
@@ -12,7 +18,39 @@ from Analyze.finderprint import Fingerprint
 import json
 from Analyze.ExploitabilityAnalysis import ExploitAnalyze
 from Analyze.payloadMutation import PayloadMutation
+from Replay.replay_request import ReplayRequest
 VERSION = "2025.1.0.0"
+
+def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
+    """Upgrades a static (Suspected) exploit_analysis to Confirmed when the
+    replay stage observed real evidence (time-delay, status/length change, or
+    error disclosure). Never downgrades on a failed/skipped replay — a
+    timeout or unreachable target does not prove the vulnerability is absent,
+    it only means it was not verified this run.
+    """
+    result = dict(exploit_analysis)
+    severity = result.get("severity", "Low")
+
+    if replay_result.get("skipped"):
+        result["confirmation_status"] = "Suspected"
+        result["display_severity"] = f"Suspected-{severity}"
+        result["confidence_source"] = "static_signature"
+        result["replay_note"] = replay_result.get("reason")
+        return result
+
+    if replay_result.get("likely_vulnerable"):
+        result["confirmation_status"] = "Confirmed"
+        result["display_severity"] = f"Confirmed-{severity}"
+        result["confidence_source"] = "replay_confirmed"
+        result["confirmed_indicators"] = replay_result.get("indicators", [])
+    else:
+        result["confirmation_status"] = "Suspected"
+        result["display_severity"] = f"Suspected-{severity}"
+        result["confidence_source"] = "static_signature"
+        result["replay_note"] = "Replay completed but no confirming indicator observed"
+
+    return result
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -96,34 +134,50 @@ def handle_arg(args):
 
         print(f"[*] Analyzing: {args.input}")
 
-        results = {"status": "analyze placeholder"}
+        results = []
 
         if args.input:
             reader = InputLoader(args.input)
             file_read = reader.load()
             vector_filtered = VectorFiltering(file_read)
-            print("/n")
             vector_filtered_list = vector_filtered.filter()
-            print(f" Filter is {vector_filtered_list}")
+            print(f"[+] Vectors after filter: {len(vector_filtered_list)}")
             clean_filter = cleanfilter(vector_filtered_list)
             clean_filter.clean_and_output()
-            normalize_output = []
+
             for i in clean_filter._clean_all():
                 value = i["cleaned_value"]
                 value_normalize = DataNormalizer(value).normalize()
                 print(f"Normalize is: {value_normalize}")
-                normalize_output.append(value_normalize)
                 fingerprint = Fingerprint(value_normalize).fingerprint_serial()
                 print(json.dumps(fingerprint, indent=4, ensure_ascii=False))
                 ExploitAnalyze_rs = ExploitAnalyze(fingerprint).analyze()
                 print(json.dumps(ExploitAnalyze_rs, indent=4, ensure_ascii=False))
-                mutations_java = PayloadMutation(ExploitAnalyze_rs,fingerprint).mutate()
-                print(mutations_java)
+
+                mutation_vector = dict(i)
+                mutation_vector["value"] = value_normalize[0] if value_normalize else value
+                mutations = PayloadMutation(ExploitAnalyze_rs, mutation_vector).mutate()
+                print(mutations)
+
+                results.append({
+                    "vector": {
+                        "url": i.get("url"),
+                        "method": i.get("method"),
+                        "location": i.get("location"),
+                        "name": i.get("name"),
+                        "original_value": i.get("original_value"),
+                    },
+                    "normalized": value_normalize,
+                    "fingerprint": fingerprint,
+                    "exploit_analysis": ExploitAnalyze_rs,
+                    "mutations": mutations,
+                })
+
         if args.output:
             save_output_file_type(
                 vectors=results,
                 target_output_name=args.output,
-                phase="scan",
+                phase="analyze",
                 version=VERSION
             )
 
@@ -131,13 +185,35 @@ def handle_arg(args):
 
         print(f"[*] Assessing risk for: {args.input}")
 
-        results = {"status": "assess placeholder"}
+        results = []
+
+        if args.input:
+            with open(args.input, "r", encoding="utf-8") as f:
+                analyze_data = json.load(f)
+
+            replayer = ReplayRequest()
+
+            for entry in analyze_data.get("vectors", []):
+                mutations = entry.get("mutations", [])
+                for mutation in mutations:
+                    replay_result = replayer.replay(mutation)
+                    print(json.dumps(replay_result, indent=4, ensure_ascii=False, default=str))
+
+                    exploit_analysis = _apply_replay_confirmation(
+                        entry.get("exploit_analysis") or {}, replay_result
+                    )
+
+                    results.append({
+                        "exploit_analysis": exploit_analysis,
+                        "mutation": mutation,
+                        "replay": replay_result,
+                    })
 
         if args.output:
             save_output_file_type(
                 vectors=results,
                 target_output_name=args.output,
-                phase="scan",
+                phase="assess",
                 version=VERSION
             )
             
@@ -145,13 +221,50 @@ def handle_arg(args):
 
         print(f"[*] Generating {args.format.upper()} report from {args.input}")
 
-        results = {"status": "report placeholder"}
+        if args.format != "json":
+            print(f"[!] Format '{args.format}' not implemented yet — falling back to json")
+
+        confirmed = []
+        suspected = []
+
+        if args.input:
+            with open(args.input, "r", encoding="utf-8") as f:
+                assess_data = json.load(f)
+
+            for entry in assess_data.get("vectors", []):
+                exploit_analysis = entry.get("exploit_analysis") or {}
+                finding = {
+                    "exploit_type": exploit_analysis.get("exploit_type"),
+                    "severity": exploit_analysis.get("display_severity"),
+                    "score": exploit_analysis.get("score"),
+                    "suggested_probe": exploit_analysis.get("suggested_probe"),
+                    "notes": exploit_analysis.get("notes"),
+                    "mutation": entry.get("mutation"),
+                }
+
+                if exploit_analysis.get("confirmation_status") == "Confirmed":
+                    finding["confirmed_indicators"] = exploit_analysis.get("confirmed_indicators", [])
+                    confirmed.append(finding)
+                else:
+                    finding["replay_note"] = exploit_analysis.get("replay_note")
+                    suspected.append(finding)
+
+        results = {
+            "summary": {
+                "confirmed_count": len(confirmed),
+                "suspected_count": len(suspected),
+            },
+            "confirmed_findings": confirmed,
+            "suspected_findings": suspected,
+        }
+
+        print(f"[+] Confirmed: {len(confirmed)} | Suspected (requires manual verification): {len(suspected)}")
 
         if args.output:
             save_output_file_type(
                 vectors=results,
                 target_output_name=args.output,
-                phase="scan",
+                phase="report",
                 version=VERSION
             )
 
