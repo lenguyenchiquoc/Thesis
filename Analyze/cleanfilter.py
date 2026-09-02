@@ -1,25 +1,40 @@
 import re
 
+from Utility import signatures
+
 class cleanfilter:
-    
+
     PREFIX_PATTERNS = [
         r'^(session|PHPSESSID|JSESSIONID|sid|__Host-session|user|auth|token|data|payload)\s*=\s*',
         r'^Bearer\s+',
-        r'^[\w-]{1,32}\s*=\s*',               
-        r'^Cookie:\s*',                       
-        r'^Set-Cookie:\s*',                   
+        r'^[\w-]{1,32}\s*=\s*',
+        r'^Cookie:\s*',
+        r'^Set-Cookie:\s*',
     ]
-    
+
     def __init__(self, filter_output):
         self.data = filter_output
     def _clean(self, value:str) -> str:
         if not isinstance(value,str) or not value.strip():
             return value
         cleaned = value.strip()
+
+        # A raw header can bundle several "; "-separated name=value pairs
+        # (Cookie per RFC 6265, Content-Disposition per RFC 6266/7578). The
+        # interesting one isn't necessarily first — score every segment and
+        # keep whichever one actually looks like a serialized payload,
+        # instead of blindly assuming position #1. Falls back to the first
+        # segment (old behavior) when none of them look suspicious, so a
+        # plain single value is unaffected.
+        if '; ' in cleaned:
+            segments = [s.strip() for s in cleaned.split('; ')]
+            suspicious = [s for s in segments if signatures.looks_like_serialized(s)]
+            cleaned = suspicious[0] if suspicious else segments[0]
+
         for pattern in self.PREFIX_PATTERNS:
             cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE).strip()
-        
-        cleaned = cleaned.strip('= \t\n\r;,')
+
+        cleaned = cleaned.strip('= \t\n\r;,"')
         return cleaned
     
     def _clean_all(self) -> list[dict]:

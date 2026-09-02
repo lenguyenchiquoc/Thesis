@@ -1,0 +1,159 @@
+{
+    "metadata": {
+        "tool": "ethicalQuoc",
+        "version": "2025.1.0.0",
+        "scan_type": "Hybrid",
+        "phase": "scan",
+        "target": "results/test_scan.json",
+        "timestamp": "2026-09-02T14:15:04.223520"
+    },
+    "summary": {
+        "total_vectors": 18
+    },
+    "vectors": [
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/my-account",
+            "method": "GET",
+            "location": "cookie",
+            "name": "session",
+            "value": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/my-account",
+            "method": "GET",
+            "location": "header",
+            "name": "Cookie",
+            "value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123; tracking=xyz789"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/session",
+            "method": "GET",
+            "location": "header",
+            "name": "X-Session-Token",
+            "value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA=="
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/invoker/JMSInvokerServlet",
+            "method": "POST",
+            "location": "header",
+            "name": "Content-Type",
+            "value": "application/x-java-serialized-object"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/invoker/JMSInvokerServlet",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA=="
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/Default.aspx",
+            "method": "POST",
+            "location": "form_body",
+            "name": "__VIEWSTATE",
+            "value": "/wEPDwUJODk5MDMyNjU5D2QWAgIDD2QWAgIBD2QWAgIBDw8WAh4EVGV4dAUDMS4wZGQY"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/Default.aspx",
+            "method": "POST",
+            "location": "form_body",
+            "name": "__EVENTVALIDATION",
+            "value": "/wEWAwLXsY-DDA=="
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/update-profile",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "value": "{\"__proto__\":{\"isAdmin\":true}}"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/task",
+            "method": "GET",
+            "location": "url_param",
+            "name": "data",
+            "value": "Y19fYnVpbHRpbl9fCmV2YWwKcDAKKFMnMSsxJwpwMQp0cDIKUnAzCi4="
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/config",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "value": "!!python/object/apply:os.system ['id']"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/dashboard",
+            "method": "GET",
+            "location": "cookie",
+            "name": "rails_session",
+            "value": "BAhvOglPYmplY3QA"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/download",
+            "method": "GET",
+            "location": "url_param",
+            "name": "file",
+            "value": "phar://uploads/avatar.jpg/test.txt"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/products",
+            "method": "GET",
+            "location": "url_param",
+            "name": "category",
+            "value": "electronics"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/products",
+            "method": "GET",
+            "location": "url_param",
+            "name": "page",
+            "value": "1"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/products",
+            "method": "GET",
+            "location": "header",
+            "name": "Accept",
+            "value": "application/json"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/products",
+            "method": "GET",
+            "location": "header",
+            "name": "User-Agent",
+            "value": "Mozilla/5.0"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/api/whoami",
+            "method": "GET",
+            "location": "header",
+            "name": "X-Forwarded-For",
+            "value": "127.0.0.1"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/my-account",
+            "method": "GET",
+            "location": "header",
+            "name": "Cookie",
+            "value": "tracking=xyz789; other=abc123; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
+        }
+    ]
+}

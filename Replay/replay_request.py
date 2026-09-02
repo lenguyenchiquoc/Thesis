@@ -32,6 +32,8 @@ class ReplayRequest:
         location = payload.get("location")
         name = payload.get("name")
         method = (payload.get("method") or "GET").upper()
+        if location in ("body", "form_body") and method == "GET":
+            method = "POST"
 
         if not url or not location or not name:
             return self._skip_result(payload, "Missing url/location/name — cannot reconstruct request")
@@ -43,7 +45,7 @@ class ReplayRequest:
         try:
             baseline = self._send(url, method, location, name, value=None)
             mutated = self._send(url, method, location, name, value=raw_payload)
-        except (urllib.error.URLError, OSError) as e:
+        except (urllib.error.URLError, OSError, ValueError) as e:
             return self._skip_result(payload, f"Request failed: {e}")
 
         indicators = self._compare(baseline, mutated)
@@ -97,8 +99,6 @@ class ReplayRequest:
             if value is not None:
                 body = urllib.parse.urlencode({name: value}).encode()
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
-                if method == "GET":
-                    method = "POST"
 
         if cookies:
             headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
