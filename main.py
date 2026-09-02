@@ -19,6 +19,7 @@ import json
 from Analyze.ExploitabilityAnalysis import ExploitAnalyze
 from Analyze.payloadMutation import PayloadMutation
 from Replay.replay_request import ReplayRequest
+from Replay.oracle_probe import OracleProbe
 VERSION = "2025.1.0.0"
 
 def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
@@ -192,9 +193,26 @@ def handle_arg(args):
                 analyze_data = json.load(f)
 
             replayer = ReplayRequest()
+            oracle = OracleProbe(replayer)
 
             for entry in analyze_data.get("vectors", []):
                 mutations = entry.get("mutations", [])
+                if not mutations:
+                    continue
+
+                vector_info = entry.get("vector") or {}
+                normalized = entry.get("normalized") or []
+                fp_type = (entry.get("fingerprint") or {}).get("type")
+
+                oracle_result = oracle.probe(fp_type, {
+                    "url": vector_info.get("url"),
+                    "method": vector_info.get("method"),
+                    "location": vector_info.get("location"),
+                    "name": vector_info.get("name"),
+                    "value": normalized[0] if normalized else vector_info.get("original_value"),
+                })
+                print(f"[*] Oracle probe ({fp_type}): {json.dumps(oracle_result, ensure_ascii=False)}")
+
                 for mutation in mutations:
                     replay_result = replayer.replay(mutation)
                     print(json.dumps(replay_result, indent=4, ensure_ascii=False, default=str))
@@ -202,6 +220,7 @@ def handle_arg(args):
                     exploit_analysis = _apply_replay_confirmation(
                         entry.get("exploit_analysis") or {}, replay_result
                     )
+                    exploit_analysis["oracle_probe"] = oracle_result
 
                     results.append({
                         "exploit_analysis": exploit_analysis,

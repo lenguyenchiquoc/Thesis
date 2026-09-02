@@ -1,153 +1,40 @@
 import re
 import base64
 
+from Utility import signatures
+
 
 class Fingerprint:
 
-    PHP_STRONG = [
-        r'O:\d+:"[^"]+":\d+:\{',
-        r'C:\d+:"[^"]+":\d+:\{',
-    ]
-    PHP_MEDIUM = [
-        r'a:\d+:\{(?:s:|i:|O:|b:|d:)',
-    ]
-    PHP_WEAK = [
-        r's:\d+:"',
-        r'i:\d+;',
-        r'd:\d+\.\d+;',
-        r'b:[01];',
-    ]
-    PHP_GADGET_CHAINS = [
-        "monolog", "guzzle", "swiftmailer",
-        "phpggc", "laravel", "symfony",
-        "__wakeup", "__destruct", "__toString",
-        "__call", "__get", "__set",
-    ]
+    PHP_STRONG = signatures.PHP_STRONG
+    PHP_MEDIUM = signatures.PHP_MEDIUM
+    PHP_WEAK = signatures.PHP_WEAK
+    PHP_GADGET_CHAINS = signatures.PHP_GADGET_CHAINS
 
-    JAVA_MAGIC_B64 = [
-        'rO0AB',
-        'rO0A',
-    ]
-    JAVA_MAGIC_BYTES = [
-        b'\xac\xed\x00\x05',
-        b'\xac\xed\x00\x04',
-    ]
-    JAVA_GADGET_CHAINS = [
-        "templatesimpl", "commonscollections", "urldns",
-        "invoketransformer", "annotationinvocationhandler",
-        "ysoserial", "jdk7u21", "spring", "hibernatevalidator",
-        "rome", "beanshell", "clojure", "groovy",
-    ]
+    JAVA_MAGIC_B64 = signatures.JAVA_MAGIC_B64
+    JAVA_MAGIC_BYTES = signatures.JAVA_MAGIC_BYTES
+    JAVA_GADGET_CHAINS = signatures.JAVA_GADGET_CHAINS
 
-    PICKLE_MAGIC_BYTES = [
-        b'\x80\x02',
-        b'\x80\x03',
-        b'\x80\x04',
-        b'\x80\x05',
-    ]
-    PICKLE_TEXT_INDICATORS = [
-        'c__builtin__', 'cposix', 'csubprocess',
-        'cos\nsystem', 'cbuiltins\nexec',
-        '__reduce__', '__reduce_ex__',
-        'ctypes\nFunctionType',
-    ]
-    PICKLE_GADGET = [
-        'os.system', 'subprocess.check_output',
-        'eval', 'exec', '__import__',
-    ]
+    PICKLE_MAGIC_BYTES = signatures.PICKLE_MAGIC_BYTES
+    PICKLE_TEXT_INDICATORS = signatures.PICKLE_TEXT_INDICATORS
+    PICKLE_GADGET = signatures.PICKLE_GADGET
 
-    YAML_STRONG = [
-        r'!!python/object/apply',
-        r'!!python/object:',
-        r'!!python/module:',
-        r'!!javax\.script',
-        r'!!com\.sun',
-        r'!!java\.lang',
-        r'!<tag:yaml\.org,2002:python',
-    ]
-    YAML_MEDIUM = [
-        r'%YAML\s+\d+\.\d+',
-        r'!<tag:yaml\.org',
-    ]
-    YAML_WEAK = [
-        r'!!',
-        r'!<',
-    ]
+    YAML_STRONG = signatures.YAML_STRONG
+    YAML_MEDIUM = signatures.YAML_MEDIUM
+    YAML_WEAK = signatures.YAML_WEAK
 
-    DOTNET_PATTERNS = [
-        r'<SOAP-ENV:Envelope',
-        r'<System\.Runtime\.Serialization',
-        r'__type.*System\.',
-        r'"@class"\s*:\s*"[^"]*"',
-        r'TypeObject.*mscorlib',
-        r'BinaryFormatter',
-        r'ObjectStateFormatter',
-        r'LosFormatter',
-        r'NetDataContractSerializer',
-    ]
-    DOTNET_VIEWSTATE = [
-        r'^/wEy',
-        r'^/wEx',
-        r'^/wEP',
-    ]
+    DOTNET_PATTERNS = signatures.DOTNET_PATTERNS
+    DOTNET_VIEWSTATE = signatures.DOTNET_VIEWSTATE
 
-    NODEJS_PATTERNS = [
-        r'_proto_\s*:',
-        r'"__proto__"\s*:',
-        r'"constructor"\s*:\s*\{',
-        r'node-serialize',
-        r'"rce"\s*:\s*"_\$\$ND_FUNC\$\$_',
-        r'_\$\$ND_FUNC\$\$_function',
-    ]
+    NODEJS_PATTERNS = signatures.NODEJS_PATTERNS
 
-    RUBY_PATTERNS = [
-        r'\\x04\\x08',
-        r'BAhv',
-        r'BAh[0-9A-Za-z+/]',
-        r'\\u0004\\b',
-    ]
-    RUBY_MAGIC_BYTES = [
-        b'\x04\x08',
-    ]
+    RUBY_PATTERNS = signatures.RUBY_PATTERNS
+    RUBY_MAGIC_BYTES = signatures.RUBY_MAGIC_BYTES
 
-    WRAPPER_DANGEROUS = [
-        "phar://", "expect://", "gopher://",
-        "glob://", "zlib://", "bzip2://",
-    ]
-    WRAPPER_MODERATE = [
-        "file://", "data://", "php://",
-        "compress.zlib://", "compress.bzip2://",
-    ]
+    WRAPPER_DANGEROUS = signatures.WRAPPER_DANGEROUS
+    WRAPPER_MODERATE = signatures.WRAPPER_MODERATE
 
-    GADGET_KEYWORDS = [
-        'TemplatesImpl', 'InvokerTransformer', 'CommonsCollections',
-        'ysoserial', 'Monolog', 'Guzzle', 'SwiftMailer',
-        'os.system', 'subprocess', '__wakeup', '__destruct',
-        'AnnotationInvocationHandler', 'URLDNS', 'phpggc',
-        'marshalsec', 'jndi:', 'ldap://', 'rmi://',
-        'commons.collections',
-        'commons-collections',
-        'org.apache.commons',
-        'com.sun.org.apache',
-        'org.apache.xalan',
-        'com.sun.org.apache.xalan',
-        'transletbytecodes',
-        'sun.reflect.annotation',
-        'java.lang.reflect.proxy',
-        'com.sun.jndi',
-        'javax.naming',
-        'org.springframework',
-        'springframework.core',
-        'groovy.lang',
-        'org.codehaus.groovy',
-        'bsh.interpreter',
-        'com.sun.syndication',
-        'java.lang.runtime',
-        'java.lang.reflect',
-        'java.net.urlclassloader',
-        'java.rmi.server',
-        'gadgets',
-    ]
+    GADGET_KEYWORDS = signatures.GADGET_KEYWORDS
 
     def __init__(self, data_list: list[str]):
         self.data = [str(item).strip() for item in data_list if str(item).strip()]
@@ -338,7 +225,7 @@ class Fingerprint:
             score  += 6
             subtype = "node-serialize RCE"
 
-        if '__proto__' in lower or 'constructor' in lower and 'prototype' in lower:
+        if signatures.is_nodejs_prototype_pollution(lower):
             score  += 3
             subtype = subtype or "Prototype Pollution"
 

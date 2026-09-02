@@ -1,0 +1,55 @@
+{
+    "metadata": {
+        "tool": "ethicalQuoc",
+        "version": "2025.1.0.0",
+        "scan_type": "Hybrid",
+        "phase": "scan",
+        "target": "results/example_scan.json",
+        "timestamp": "2026-09-02T13:45:57.458664"
+    },
+    "summary": {
+        "total_vectors": 5
+    },
+    "vectors": [
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/case-a1-target-first",
+            "method": "GET",
+            "location": "header",
+            "name": "Cookie",
+            "value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123; tracking=xyz789"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/case-a2-target-last",
+            "method": "GET",
+            "location": "header",
+            "name": "Cookie",
+            "value": "tracking=xyz789; other=abc123; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/case-a3-target-middle",
+            "method": "GET",
+            "location": "header",
+            "name": "Cookie",
+            "value": "tracking=xyz789; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123"
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/case-b-content-disposition",
+            "method": "POST",
+            "location": "header",
+            "name": "Content-Disposition",
+            "value": "form-data; name=\"avatar\"; filename=\"Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=.txt\""
+        },
+        {
+            "source": "har",
+            "url": "https://testlab.example.com/case-b-content-disposition",
+            "method": "POST",
+            "location": "raw_body",
+            "name": "payload",
+            "value": "binary file content placeholder"
+        }
+    ]
+}
