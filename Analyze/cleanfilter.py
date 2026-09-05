@@ -31,8 +31,22 @@ class cleanfilter:
             suspicious = [s for s in segments if signatures.looks_like_serialized(s)]
             cleaned = suspicious[0] if suspicious else segments[0]
 
-        for pattern in self.PREFIX_PATTERNS:
-            cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE).strip()
+        # Stripping one wrapper can expose another underneath it (e.g.
+        # "Cookie: session=<payload>" — stripping "Cookie: " only reveals
+        # "session=" *after* that pattern was already checked). Keep
+        # re-running the full pattern list until a full pass changes
+        # nothing, instead of a single pass, so stacked wrappers are fully
+        # unwrapped regardless of order. Guaranteed to terminate: every
+        # pattern that matches strictly shortens `cleaned`, and the loop
+        # stops as soon as one full pass makes no change.
+        changed = True
+        while changed:
+            changed = False
+            for pattern in self.PREFIX_PATTERNS:
+                stripped = re.sub(pattern, '', cleaned, flags=re.IGNORECASE).strip()
+                if stripped != cleaned:
+                    cleaned = stripped
+                    changed = True
 
         cleaned = cleaned.strip('= \t\n\r;,"')
         return cleaned
