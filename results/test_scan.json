@@ -5,7 +5,7 @@
         "scan_type": "Hybrid",
         "phase": "scan",
         "target": "results/test_scan.json",
-        "timestamp": "2026-09-02T14:15:04.223520"
+        "timestamp": "2026-09-05T07:32:42.348942"
     },
     "summary": {
         "total_vectors": 18

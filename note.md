@@ -13,6 +13,17 @@ python main.py analyze -i results/test_scan.json -o results/test_analyze.json
 ```
 `results/test_scan.json`/`results/test_analyze.json` giữ lại làm baseline so sánh — không xóa như file test tạm khác.
 
+**`debug_pipeline.py`** (project root, file mới) — tool debug riêng, xem output tại đúng 1 bước trung gian thay vì phải chạy hết `analyze` rồi mới biết. Tái sử dụng y hệt class `main.py` dùng (không viết lại logic riêng, tránh lệch nhau như đã gặp với `TEST_COMMANDS`/signature trước đây):
+```
+python debug_pipeline.py -i results/test_scan.json --step 2   # PostFilter
+python debug_pipeline.py -i results/test_scan.json --step 3   # + CleanFilter
+python debug_pipeline.py -i results/test_scan.json --step 4   # + Normalize
+python debug_pipeline.py -i results/test_scan.json --step 5   # + Fingerprint
+python debug_pipeline.py -i results/test_scan.json --step 6   # + ExploitabilityAnalysis
+python debug_pipeline.py -i results/test_scan.json --step 7   # + PayloadMutation
+```
+`-o <file>` để lưu output ra JSON thay vì chỉ in console.
+
 **Đã phát hiện qua lần chạy đầu tiên (test.har), CHƯA FIX (để dành theo từng bước):**
 - [ ] `har_loader.py` tạo `location: "raw_body"` cho POST body dạng JSON/YAML/XML/raw text, nhưng `postfiltered.py`'s whitelist chỉ chấp nhận `"body"` (thiếu `"raw_body"`) → **mọi raw POST body bị loại bỏ hoàn toàn**, bất kể nội dung. Ảnh hưởng: NodeJS/YAML/raw Java body test case đều mất vì lý do này.
 - [ ] `postfiltered.py`'s generic base64-shape check (`_look_maybe_suspicious`) xóa padding `=` TRƯỚC rồi mới check `len % 4 == 0` — logic sai, vì base64 hợp lệ CÓ padding luôn chia hết 4 ở độ dài GỐC, xóa padding trước sẽ làm hầu hết base64 thật (có padding) fail check này. Ảnh hưởng: Pickle base64 (không có signature riêng, dựa vào check chung này) bị loại oan.
@@ -50,6 +61,7 @@ python main.py analyze -i results/test_scan.json -o results/test_analyze.json
 - `postfiltered.py` — `_look_maybe_suspicious()` có check riêng cho Java/PHP nhưng KHÔNG có cho Pickle/.NET/Ruby/NodeJS (chỉ sống sót nhờ heuristic chung, không chắc chắn) → đã thêm check riêng cho cả 4 loại, đồng bộ với `finderprint.py`. Verify bằng test thật: payload `constructor.prototype.isAdmin=true` (NodeJS prototype pollution) trước đây bị loại oan dù `ExploitabilityAnalysis` đã có logic nhận diện đúng nó — giờ đã fix
 - `cleanfilter.py` — header `Cookie` chứa nhiều cookie ghép (`session=<payload>; other=abc; tracking=xyz`) chỉ bị cắt phần đầu (`session=`), phần đuôi (cookie khác) dính nguyên vào `cleaned_value`, sau đó `normalize.py` cố decode luôn phần rác này ra byte nhị phân lẫn vào payload thật. Fix v1 (sáng): sau khi strip prefix, cắt tại dấu `"; "` đầu tiên. An toàn cho PHP vì PHP serialize dùng `;` không có dấu cách theo sau (`b:0;}` chứ không phải `b:0; }`)
 - `cleanfilter.py` — Fix v1 chỉ đúng khi cookie mục tiêu đứng ĐẦU chuỗi gộp; nếu đứng giữa/cuối (`tracking=xyz; session=<payload>`), fix v1 lấy nhầm cookie đầu tiên → **false negative im lặng** (Fingerprint báo `Unknown/Low`, mất hoàn toàn payload thật, không có dấu hiệu báo lỗi). Nghiêm trọng hơn khi HAR không có mảng `cookies[]` sạch đi kèm (nguồn không phải Chrome, hoặc `scan --url` qua Playwright — không có mảng cookie riêng). Cùng gốc rễ với Content-Disposition (`form-data; name=...; filename=...` — cùng cấu trúc `"; "`-separated). Fix v2: chuyển `_look_maybe_suspicious()` từ `postfiltered.py` sang `signatures.looks_like_serialized()` dùng chung; `cleanfilter._clean()` giờ tách theo `"; "` thành từng đoạn, CHẤM ĐIỂM từng đoạn bằng hàm chung đó, giữ đoạn nào thật sự giống payload — không còn giả định "luôn ở vị trí đầu". Verify bằng 4 case (`example_multivalue_header.har`): Cookie đầu/giữa/cuối đều ra đúng `PHP High` y hệt nhau; Content-Disposition cải thiện đáng kể (không còn rác `form-data`) nhưng chưa auto-decode hoàn toàn (dính đuôi `.txt` từ `filename=`) — chấp nhận vì vector này ít liên quan thực tế
+- `cleanfilter.py` — bug "2 lớp wrap chồng" (`Cookie: session=<payload>`) trước đây không fix được vì vòng lặp `PREFIX_PATTERNS` chỉ chạy 1 lượt: pattern `session=` bị kiểm tra và bỏ qua TRƯỚC khi `Cookie:` được strip, nên khi `session=` lộ ra không ai quay lại strip nữa. Fix: đổi `for` (1 lượt) thành `while changed` (lặp lại đến khi 1 lượt đầy đủ không còn thay đổi gì) — tự dừng đảm bảo vì mỗi lần strip thành công luôn làm ngắn chuỗi đi. Verify: case 2 lớp VÀ 3 lớp (`Set-Cookie: Cookie: session=`) đều bóc hết đúng, không lặp vô hạn, không regression với các test case cũ
 
 ## 3. Việc học thuật — quan trọng hơn code lúc này
 
