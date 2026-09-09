@@ -5,7 +5,7 @@
         "scan_type": "Hybrid",
         "phase": "analyze",
         "target": "results/test_analyze.json",
-        "timestamp": "2026-09-02T14:53:25.747615"
+        "timestamp": "2026-09-09T15:21:31.950332"
     },
     "summary": {
         "total_vectors": 8
@@ -20,10 +20,11 @@
                 "original_value": "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
             },
             "normalized": [
-                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30"
             ],
             "fingerprint": {
-                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;} Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30",
                 "type": "PHP",
                 "confidence": "High",
                 "risk_level": "High",
@@ -69,10 +70,11 @@
                 "original_value": "session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30=; other=abc123; tracking=xyz789"
             },
             "normalized": [
-                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30"
             ],
             "fingerprint": {
-                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;} Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30",
                 "type": "PHP",
                 "confidence": "High",
                 "risk_level": "High",
@@ -118,11 +120,10 @@
                 "original_value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA=="
             },
             "normalized": [
-                "\u0000\u0005sr\u0000\u0011java.util.HashMap",
                 "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
             ],
             "fingerprint": {
-                "value": "\u0000\u0005sr\u0000\u0011java.util.HashMap rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA",
+                "value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA",
                 "type": "Java",
                 "confidence": "High",
                 "risk_level": "High",
@@ -231,10 +232,11 @@
                 "original_value": "BAhvOglPYmplY3QA"
             },
             "normalized": [
+                "\u0004\bo:\tObject\u0000",
                 "BAhvOglPYmplY3QA"
             ],
             "fingerprint": {
-                "value": "BAhvOglPYmplY3QA",
+                "value": "\u0004\bo:\tObject\u0000 BAhvOglPYmplY3QA",
                 "type": "Ruby",
                 "confidence": "High",
                 "risk_level": "High",
@@ -242,37 +244,21 @@
                 "gadget_detected": false,
                 "gadget_hints": [],
                 "all_candidates": {
-                    "Ruby": 8
+                    "Ruby": 13
                 }
             },
             "exploit_analysis": {
-                "exploitable": true,
-                "exploit_type": "Ruby Marshal Deserialization",
-                "score": 3,
-                "severity": "Medium",
+                "exploitable": false,
+                "exploit_type": null,
+                "score": 0,
+                "severity": "Low",
                 "confidence_source": "static_signature",
                 "confirmation_status": "Suspected",
-                "display_severity": "Suspected-Medium",
-                "suggested_probe": "ruby_marshal",
-                "notes": "Marshal \\x04\\x08 header detected | Try Marshal-based gadget chain (e.g. via a ruby -e helper script)"
+                "display_severity": "Suspected-Low",
+                "suggested_probe": "none",
+                "notes": "No Ruby Marshal header detected"
             },
-            "mutations": [
-                {
-                    "error": "ruby not found or timed out",
-                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
-                    "command": "ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\""
-                },
-                {
-                    "error": "ruby not found or timed out",
-                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
-                    "command": "ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\""
-                },
-                {
-                    "error": "ruby not found or timed out",
-                    "hint": "Install Ruby and ensure 'ruby' is on PATH to generate Marshal payloads",
-                    "command": "ruby -e \"puts Base64.strict_encode64(Marshal.dump(...))\""
-                }
-            ]
+            "mutations": []
         },
         {
             "vector": {
@@ -320,10 +306,11 @@
                 "original_value": "tracking=xyz789; other=abc123; session=Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30="
             },
             "normalized": [
-                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}"
+                "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30"
             ],
             "fingerprint": {
-                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;}",
+                "value": "O:4:\"User\":2:{s:8:\"username\";s:6:\"wiener\";s:5:\"admin\";b:0;} Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjY6IndpZW5lciI7czo1OiJhZG1pbiI7YjowO30",
                 "type": "PHP",
                 "confidence": "High",
                 "risk_level": "High",

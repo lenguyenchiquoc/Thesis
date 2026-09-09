@@ -1,16 +1,3 @@
-"""Shared serialization-format signatures used across the pipeline.
-
-Single source of truth for the pattern/keyword lists that both the
-PostFilter stage (Analyze/postfiltered.py, coarse keep/drop gate) and the
-Fingerprint stage (Analyze/finderprint.py, precise classification +
-confidence scoring) need to recognize the same 8 serialization formats.
-
-Keeping these in one place avoids the two stages silently drifting out of
-sync — e.g. Fingerprint/ExploitabilityAnalysis knowing how to recognize a
-pattern that PostFilter doesn't, causing a valid payload to be dropped
-before it ever reaches the later stages that could have identified it.
-"""
-
 import re
 import urllib.parse
 
@@ -161,23 +148,10 @@ GADGET_KEYWORDS = [
 
 
 def is_nodejs_prototype_pollution(text: str) -> bool:
-    """True if `text` (already lowercased) shows a NodeJS prototype
-    pollution indicator — either the literal __proto__ key, or the
-    constructor.prototype detour used when __proto__ itself is blocked by
-    the target application. Shared by PostFilter and Fingerprint/
-    ExploitabilityAnalysis so both stages recognize the exact same cases.
-    """
     return '__proto__' in text or ('constructor' in text and 'prototype' in text)
 
 
 def looks_like_serialized(value: str) -> bool:
-    """True if `value` shows a signature consistent with any of the 8
-    supported serialization formats. Shared by PostFilter (coarse keep/drop
-    gate over raw HTTP vectors) and CleanFilter (picking the right segment
-    out of a "; "-bundled multi-value header like Cookie or
-    Content-Disposition) so both stages agree on what "looks suspicious"
-    means, instead of maintaining two separate opinions that can drift.
-    """
     if len(value) < 10:
         return False
 
@@ -190,47 +164,40 @@ def looks_like_serialized(value: str) -> bool:
         decoded_value = value
         decoded_lower = value_lower
 
-    #PHP — precise patterns (O:/C: two-colon syntax, and the i:/d:/b:/s:
-    # single-colon primitives), same source Fingerprint uses
+    bin_data = value.encode('utf-8', errors='ignore')
+    if any(magic in bin_data for magic in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
+        return True
+
     if any(re.search(p, value) or re.search(p, decoded_value) for p in PHP_STRONG + PHP_WEAK):
         return True
     if re.search(r'(?i)Tzo[0-9]+[A-Za-z0-9+/=]*', value) or re.search(r'(?i)Tzo[0-9]+[A-Za-z0-9+/=]*', decoded_value):
         return True
 
-    #Java
     if value.startswith("rO0") or "rO0AB" in value or value.startswith("ACED") or "ACED" in value.upper():
         return True
     if "ysoserial" in decoded_lower or "commonscollections" in decoded_lower or "urlclassloader" in decoded_lower or "templatesimpl" in decoded_lower:
         return True
-    # Content-Type declaring a Java-serialized body (Spring HttpInvoker / JBoss remoting)
     if "application/x-java-serialized-object" in value_lower:
         return True
-    #Yaml
     if any(y in value for y in ["!!", "!<!", "%YAML", "!<tag:yaml.org"]):
         return True
 
-    #Python Pickle — raw binary magic bytes vary by trailing opcode, so match on
-    # text indicators instead
     if any(p in decoded_value for p in PICKLE_TEXT_INDICATORS):
         return True
 
-    #.NET — ViewState prefix + dangerous formatter/type indicators
     if any(re.search(p, value) or re.search(p, decoded_value) for p in DOTNET_VIEWSTATE):
         return True
     if any(re.search(p, value, re.IGNORECASE) or re.search(p, decoded_value, re.IGNORECASE) for p in DOTNET_PATTERNS):
         return True
 
-    #Ruby Marshal — BAh is the base64 prefix of \x04\x08 (version header)
     if any(re.search(p, value) or re.search(p, decoded_value) for p in RUBY_PATTERNS):
         return True
 
-    #NodeJS — node-serialize RCE / prototype pollution
     if is_nodejs_prototype_pollution(decoded_lower):
         return True
     if any(re.search(p, value, re.IGNORECASE) or re.search(p, decoded_value, re.IGNORECASE) for p in NODEJS_PATTERNS):
         return True
 
-    #Gadget chain
     if value.startswith(("{", "[")) and len(value) > 100:
         if any(k in decoded_lower for k in ["__class__", "__wakeup", "__destruct", "java.lang", "java.util", "gadget", "phar"]):
             return True

@@ -27,13 +27,6 @@ def _load_raw_config() -> dict:
 
 
 def get_tool_path(name: str) -> str:
-    """Resolves a tool path by name (e.g. 'ysoserial', 'phpggc').
-
-    Looks up config.json (or the file at ETHICALQUOC_CONFIG) under the
-    'tools' key. A relative path is resolved against the project root so the
-    tool works regardless of drive letter or clone location. Falls back to
-    built-in defaults if the config file or key is missing.
-    """
     global _config_cache
     if _config_cache is None:
         raw = _load_raw_config()
@@ -51,14 +44,6 @@ def get_tool_path(name: str) -> str:
 
 
 def get_oob_domain() -> str:
-    """Returns the user-configured OOB (out-of-band) canary domain, e.g. a
-    Burp Collaborator or Interactsh subdomain, used by probes that need an
-    out-of-band DNS/HTTP interaction to confirm blind deserialization
-    (Java URLDNS, SSRF via gopher://). Empty string if not configured —
-    callers should fall back to a clearly-labeled placeholder in that case.
-    Checked in order: ETHICALQUOC_OOB_DOMAIN env var, then config.json's
-    top-level "oob_domain" key.
-    """
     env_value = os.environ.get("ETHICALQUOC_OOB_DOMAIN")
     if env_value:
         return env_value

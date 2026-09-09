@@ -6,13 +6,6 @@ import urllib.request
 
 
 class ReplayRequest:
-    """Reconstructs the original HTTP request, injects a mutated payload at the
-    correct location (cookie, header, body, query), sends it, and compares the
-    response against a baseline (unmodified) request to flag indicators of
-    successful deserialization: response time delta, HTTP status change,
-    response length delta, and error-disclosure keywords.
-    """
-
     ERROR_KEYWORDS = [
         "exception", "stack trace", "stacktrace", "traceback",
         "fatal error", "unserialize()", "objectinputstream",

@@ -3,18 +3,6 @@ import re
 
 
 class OracleProbe:
-    """Cheap, low-noise probe run once per vector before replaying a
-    potentially large set of exploit-specific payloads (e.g. dozens of
-    phpggc gadget chains). Confirms the target actually parses the
-    parameter as the detected serialization format, so a parameter the
-    target ignores/rejects for this format doesn't get hammered with many
-    exploit attempts for no reason.
-
-    This is additive evidence only — a negative or inconclusive oracle
-    result never gates or skips the full replay; it's surfaced alongside
-    the Confirmed/Suspected evidence so a reviewer can judge for themselves.
-    """
-
     def __init__(self, replayer):
         self.replayer = replayer
 
@@ -27,13 +15,6 @@ class OracleProbe:
         }
 
     def _corrupt_php_length(self, value: str) -> str | None:
-        """Breaks the declared length of the first string field in a PHP
-        serialized value (e.g. s:4:"role" -> s:101:"role"). A well-formed
-        PHP unserialize() call on this value will fail with a length
-        mismatch, producing an observable behavior change (error text,
-        status code, or response length) if — and only if — the target
-        actually runs unserialize() on this parameter.
-        """
         match = re.search(r's:(\d+):"([^"]*)"', value)
         if not match:
             return None

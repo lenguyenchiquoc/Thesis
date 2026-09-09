@@ -1,21 +1,3 @@
-"""Pipeline step inspector — runs the analyze pipeline up to a specific
-stage and prints/saves exactly what that stage produced, instead of running
-the whole chain to the end like `main.py analyze` does.
-
-Reuses the exact same classes main.py calls (no separate/duplicated logic),
-so what you see here is guaranteed to match what the real pipeline does at
-that point — this exists specifically to catch input/output mismatches
-between adjacent stages without re-deriving the whole chain by hand.
-
-Usage:
-    python debug_pipeline.py -i results/scan_output.json --step 2   # PostFilter
-    python debug_pipeline.py -i results/scan_output.json --step 3   # + CleanFilter
-    python debug_pipeline.py -i results/scan_output.json --step 4   # + Normalize
-    python debug_pipeline.py -i results/scan_output.json --step 5   # + Fingerprint
-    python debug_pipeline.py -i results/scan_output.json --step 6   # + ExploitabilityAnalysis
-    python debug_pipeline.py -i results/scan_output.json --step 7   # + PayloadMutation
-"""
-
 import argparse
 import io
 import json
@@ -61,21 +43,18 @@ def main():
     reader = InputLoader(args.input)
     file_read = reader.load()
 
-    # Stage 2: PostFilter
     vector_filtered_list = VectorFiltering(file_read).filter()
     print(f"[+] Stage 2 (PostFilter): {len(vector_filtered_list)} vectors kept")
     if args.step == 2:
         _emit(vector_filtered_list, args.output)
         return
 
-    # Stage 3: CleanFilter
     cleaned_vectors = cleanfilter(vector_filtered_list)._clean_all()
     print(f"[+] Stage 3 (CleanFilter): {len(cleaned_vectors)} vectors")
     if args.step == 3:
         _emit(cleaned_vectors, args.output)
         return
 
-    # Stages 4-7: same per-vector chain as main.py's analyze command
     results = []
     for vector in cleaned_vectors:
         value = vector["cleaned_value"]

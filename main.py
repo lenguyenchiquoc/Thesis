@@ -23,12 +23,6 @@ from Replay.oracle_probe import OracleProbe
 VERSION = "2025.1.0.0"
 
 def _apply_replay_confirmation(exploit_analysis: dict, replay_result: dict) -> dict:
-    """Upgrades a static (Suspected) exploit_analysis to Confirmed when the
-    replay stage observed real evidence (time-delay, status/length change, or
-    error disclosure). Never downgrades on a failed/skipped replay — a
-    timeout or unreachable target does not prove the vulnerability is absent,
-    it only means it was not verified this run.
-    """
     result = dict(exploit_analysis)
     severity = result.get("severity", "Low")
 

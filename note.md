@@ -1,5 +1,7 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**Đã bỏ hết comment/docstring** trong 9 file theo yêu cầu (`ExploitabilityAnalysis.py`, `cleanfilter.py`, `payloadMutation.py`, `Utility/signatures.py`, `debug_pipeline.py`, `Replay/oracle_probe.py`, `Replay/replay_request.py`, `main.py`, `tool_config.py` — `normalize.py` đã làm ở lượt trước) — chỉ giữ lại code, không đổi logic. Verify bằng regression `test.har` + `result1.json` + bộ test gzip-wrapping (Ruby/.NET/NodeJS/Wrapper) — kết quả giống hệt trước.
+
 ## 0. File test cố định — `TestCase/test.har`
 
 `TestCase/test.har` là fixture HAR cố định, 13 request phủ đủ 8 loại serialize + case multi-cookie target đứng đầu/cuối + 1 case benign (check false positive) + 1 case IP-spoofing header (check đã bỏ đúng). Dùng để test end-to-end mỗi khi sửa 1 bước trong pipeline, thay vì chỉ test hàm lẻ.
@@ -27,8 +29,16 @@ python debug_pipeline.py -i results/test_scan.json --step 7   # + PayloadMutatio
 **Đã phát hiện qua lần chạy đầu tiên (test.har), CHƯA FIX (để dành theo từng bước):**
 - [ ] `har_loader.py` tạo `location: "raw_body"` cho POST body dạng JSON/YAML/XML/raw text, nhưng `postfiltered.py`'s whitelist chỉ chấp nhận `"body"` (thiếu `"raw_body"`) → **mọi raw POST body bị loại bỏ hoàn toàn**, bất kể nội dung. Ảnh hưởng: NodeJS/YAML/raw Java body test case đều mất vì lý do này.
 - [ ] `postfiltered.py`'s generic base64-shape check (`_look_maybe_suspicious`) xóa padding `=` TRƯỚC rồi mới check `len % 4 == 0` — logic sai, vì base64 hợp lệ CÓ padding luôn chia hết 4 ở độ dài GỐC, xóa padding trước sẽ làm hầu hết base64 thật (có padding) fail check này. Ảnh hưởng: Pickle base64 (không có signature riêng, dựa vào check chung này) bị loại oan.
+- [ ] `Analyze/normalize.py`'s `_generate_decodes()` dùng `.decode('utf-8', errors='ignore')` cho dữ liệu binary tùy ý (Java serialize, Pickle...) — byte không hợp lệ UTF-8 đứng một mình (ví dụ `\xac\xed` — 2 byte đầu magic Java) bị **xóa mất hẳn**, không phải hiển thị sai. Ảnh hưởng: Java payload sau khi giải nén gzip mất đúng 2 byte magic đầu, không detect được (`Unknown/Low`) dù PHP/Ruby/NodeJS/.NET/Wrapper cùng kịch bản đều decode đúng. Bug độc lập, có từ trước, chưa fix
 
 ## 1. Việc kỹ thuật còn thiếu
+
+**`Analyze/normalize.py` — review + fix (session mới):**
+- [x] `_is_serialized_payload()` chỉ có check Java/PHP/YAML/Pickle-keyword, thiếu Ruby/.NET/NodeJS/Wrapper → payload các loại này giải nén đúng qua gzip+base64 nhưng bị âm thầm vứt bỏ (không nhận ra là "có ý nghĩa"), trả về lại chuỗi gzip+base64 gốc chưa giải nén, `Fingerprint` không tự gzip-decompress được nên báo `Unknown/Low` — false negative đã verify bằng test thật. Fix: đổi sang gọi `signatures.looks_like_serialized()` (đã bao phủ đủ 8 loại)
+- [x] `signatures.looks_like_serialized()` bản thân cũng thiếu check byte thô (chỉ có dạng chữ escape `\x04\x08` và base64 `BAh...`, không có byte điều khiển thật) — Ruby Marshal sau khi giải nén gzip ra byte thô không match được. Fix: thêm check `JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES` trên `value.encode('utf-8', errors='ignore')`
+- [x] `_serialized_score()` cũng chỉ có điểm cộng Java/PHP — candidate .NET đã giải nén đúng bị **hòa điểm** với chuỗi gzip+base64 chưa giải nén (cả 2 đều -3 vì cùng trông giống base64 thuần túy), tiebreaker chọn nhầm. Fix: thêm điểm cộng cho DOTNET_VIEWSTATE/DOTNET_PATTERNS/RUBY_PATTERNS/RUBY_MAGIC_BYTES/NODEJS_PATTERNS/WRAPPER_DANGEROUS (tái dùng `signatures.py`)
+- Verify: cả 4 loại (Ruby/NodeJS/.NET/Wrapper) qua gzip+base64 giờ decode và detect đúng; PHP/Java-base64-đơn-lớp không regression (trừ bug byte-loss riêng ở trên, không liên quan 3 fix này)
+- Đã bỏ hết comment trong file theo yêu cầu — logic giữ nguyên, verify lại bằng đúng bộ test trên
 
 - [ ] Unit test chính thức (hiện chỉ có `Analyze/test.py` — 6 dòng scratch, không phải test suite)
 - [x] Oracle probe — đã code cho PHP (length-corruption technique), chạy trước khi replay toàn bộ mutation batch, chỉ bổ sung bằng chứng chứ không gate/skip. Còn thiếu cho Java/Pickle/YAML/.NET/NodeJS/Ruby/Wrapper
