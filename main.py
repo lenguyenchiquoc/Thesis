@@ -9,7 +9,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 from Scanner.har_loader import HarLoader
 from Scanner.browser_automated_scan import BrowserScanner
-from Output.save_output import save_output_file_type
+from Output.save_output import save_output_file_type, default_output_path
 from Input.input_loader import InputLoader
 from Analyze.postfiltered import VectorFiltering
 from Analyze.normalize import DataNormalizer
@@ -117,13 +117,12 @@ def handle_arg(args):
 
         print(f"[+] Total collected: {len(total_vectors)} vectors")
 
-        if args.output:
-            save_output_file_type(
-                vectors=total_vectors,
-                target_output_name=args.output,
-                phase="scan",
-                version=VERSION
-            )
+        save_output_file_type(
+            vectors=total_vectors,
+            target_output_name=args.output or default_output_path("scan"),
+            phase="scan",
+            version=VERSION
+        )
 
     elif args.command == "analyze":
 
@@ -168,13 +167,12 @@ def handle_arg(args):
                     "mutations": mutations,
                 })
 
-        if args.output:
-            save_output_file_type(
-                vectors=results,
-                target_output_name=args.output,
-                phase="analyze",
-                version=VERSION
-            )
+        save_output_file_type(
+            vectors=results,
+            target_output_name=args.output or default_output_path("analyze"),
+            phase="analyze",
+            version=VERSION
+        )
 
     elif args.command == "assess":
 
@@ -222,13 +220,12 @@ def handle_arg(args):
                         "replay": replay_result,
                     })
 
-        if args.output:
-            save_output_file_type(
-                vectors=results,
-                target_output_name=args.output,
-                phase="assess",
-                version=VERSION
-            )
+        save_output_file_type(
+            vectors=results,
+            target_output_name=args.output or default_output_path("assess"),
+            phase="assess",
+            version=VERSION
+        )
             
     elif args.command == "report":
 
@@ -273,13 +270,12 @@ def handle_arg(args):
 
         print(f"[+] Confirmed: {len(confirmed)} | Suspected (requires manual verification): {len(suspected)}")
 
-        if args.output:
-            save_output_file_type(
-                vectors=results,
-                target_output_name=args.output,
-                phase="report",
-                version=VERSION
-            )
+        save_output_file_type(
+            vectors=results,
+            target_output_name=args.output or default_output_path("report"),
+            phase="report",
+            version=VERSION
+        )
 
 
 if __name__ == "__main__":

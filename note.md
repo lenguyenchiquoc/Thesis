@@ -1,34 +1,46 @@
 # Ghi chú tiến độ — EthicalQuoc
 
+**Output tự động theo ngày + timestamp** — `Output/save_output.py` thêm `default_output_path(phase)`: nếu không truyền `-o`, tự tạo `results/<DDMMYYYY>/<phase>_<HHMMSS>.json` (tự tạo folder ngày nếu chưa có). `main.py` bỏ điều kiện `if args.output:` cũ (trước đây không truyền `-o` thì KHÔNG lưu gì cả) — giờ luôn lưu, chỉ khác tên/đường dẫn. Nếu user tự truyền `-o`, giữ nguyên đường dẫn đó (không tự ý nhét vào folder ngày). `save_output_file_type()` cũng tự `os.makedirs()` thư mục cha nếu thiếu, tránh crash khi path không tồn tại sẵn.
+
 **Đã bỏ hết comment/docstring** trong 9 file theo yêu cầu (`ExploitabilityAnalysis.py`, `cleanfilter.py`, `payloadMutation.py`, `Utility/signatures.py`, `debug_pipeline.py`, `Replay/oracle_probe.py`, `Replay/replay_request.py`, `main.py`, `tool_config.py` — `normalize.py` đã làm ở lượt trước) — chỉ giữ lại code, không đổi logic. Verify bằng regression `test.har` + `result1.json` + bộ test gzip-wrapping (Ruby/.NET/NodeJS/Wrapper) — kết quả giống hệt trước.
 
-## 0. File test cố định — `TestCase/test.har`
+## 0. File test benchmark chuẩn — `TestCase/comprehensive.har`
 
-`TestCase/test.har` là fixture HAR cố định, 13 request phủ đủ 8 loại serialize + case multi-cookie target đứng đầu/cuối + 1 case benign (check false positive) + 1 case IP-spoofing header (check đã bỏ đúng). Dùng để test end-to-end mỗi khi sửa 1 bước trong pipeline, thay vì chỉ test hàm lẻ.
+Đã xóa toàn bộ file test cũ (`test.har`, `example_multivalue_header.har`, `stress_test.har` + các JSON output tương ứng) — thay bằng **1 file benchmark chuẩn duy nhất**, giữ lại `results/result1.json`/`result2.json` (data lab thật, không đụng vào).
 
-`TestCase/example_multivalue_header.har` — file minh họa RIÊNG (không phải bộ regression chính), 4 case: Cookie target đứng đầu/giữa/cuối + Content-Disposition (RFC 6266/7578, cùng cấu trúc `"; "`-separated name=value như Cookie nhưng ít liên quan thực tế hơn nhiều vì multipart field value đã có sẵn sạch qua `postData.params`).
+`TestCase/generate_comprehensive_har.py` — script sinh file HAR (giữ lại trong repo để tái tạo/mở rộng sau này, không phải blob JSON tĩnh khó sửa). Chạy `python TestCase/generate_comprehensive_har.py` để tạo lại `TestCase/comprehensive.har`.
+
+`TestCase/comprehensive.har` — mô phỏng traffic thật của 1 web app (e-commerce + dashboard): **642 request** (620 nhiễu thực tế: browse/search/cart/analytics/static asset/WebSocket/IP-spoofing/JWT hợp lệ... + 22 payload nguy hiểm rải ngẫu nhiên, đủ 8 loại serialize + mọi edge case đã phát hiện trong session: multi-cookie đầu/giữa/cuối, gzip-wrap, short base64, Content-Disposition, Content-Type signal).
 
 Cách dùng:
 ```
-python main.py scan --har TestCase/test.har -o results/test_scan.json
-python main.py analyze -i results/test_scan.json -o results/test_analyze.json
+python main.py scan --har TestCase/comprehensive.har -o results/comprehensive_scan.json
+python debug_pipeline.py -i results/comprehensive_scan.json --step 2   # PostFilter
+python debug_pipeline.py -i results/comprehensive_scan.json --step 4   # Normalize
+python debug_pipeline.py -i results/comprehensive_scan.json --step 5   # Fingerprint
 ```
-`results/test_scan.json`/`results/test_analyze.json` giữ lại làm baseline so sánh — không xóa như file test tạm khác.
 
-**`debug_pipeline.py`** (project root, file mới) — tool debug riêng, xem output tại đúng 1 bước trung gian thay vì phải chạy hết `analyze` rồi mới biết. Tái sử dụng y hệt class `main.py` dùng (không viết lại logic riêng, tránh lệch nhau như đã gặp với `TEST_COMMANDS`/signature trước đây):
+**Kết quả benchmark lần chạy đầu (2026-09-12), dùng cho RQ1/RQ2 — có số liệu thật:**
+- Hiệu năng: 642 request → 5935 vector trong 0.94s; PostFilter 0.38s; Normalize 0.36s; Fingerprint 0.40s — không có vấn đề hiệu năng ở quy mô ~6000 vector.
+- Giảm nhiễu: PostFilter giữ 39/5935 vector (99.34% loại bỏ).
+- **False positive signal**: 27 header `Authorization` chứa JWT hợp lệ (benign) bị PostFilter giữ lại (do JWT trông giống base64 dài), nhưng `Fingerprint` đúng đắn phân loại `Unknown` — không sai lệch kết quả cuối, chỉ tốn thêm xử lý downstream.
+- **False negative — định lượng chính xác 2 bug đã biết**: 6/22 payload thật (Java-gzip, Ruby-gzip, NodeJS-gzip-qua-header, Wrapper-gzip, YAML-gzip-qua-header, Pickle) bị mất — verify bằng số liệu: cả 6 đều có độ dài GỐC chia hết 4 (base64 hợp lệ) nhưng sau khi `.rstrip('=')` còn dư 2 hoặc 3 (fail check `%4==0`) — đúng 100% bug đã ghi bên dưới. Cộng 2/22 mất vì bug `raw_body` (NodeJS raw, YAML raw) = **8/22 (36%) tổng false negative từ 2 bug chưa fix**.
+
+**`debug_pipeline.py`** (project root) — tool debug riêng, xem output tại đúng 1 bước trung gian thay vì phải chạy hết `analyze` rồi mới biết. Tái sử dụng y hệt class `main.py` dùng (không viết lại logic riêng, tránh lệch nhau như đã gặp với `TEST_COMMANDS`/signature trước đây):
 ```
-python debug_pipeline.py -i results/test_scan.json --step 2   # PostFilter
-python debug_pipeline.py -i results/test_scan.json --step 3   # + CleanFilter
-python debug_pipeline.py -i results/test_scan.json --step 4   # + Normalize
-python debug_pipeline.py -i results/test_scan.json --step 5   # + Fingerprint
-python debug_pipeline.py -i results/test_scan.json --step 6   # + ExploitabilityAnalysis
-python debug_pipeline.py -i results/test_scan.json --step 7   # + PayloadMutation
+python debug_pipeline.py -i results/scan.json --step 2   # PostFilter
+python debug_pipeline.py -i results/scan.json --step 3   # + CleanFilter
+python debug_pipeline.py -i results/scan.json --step 4   # + Normalize
+python debug_pipeline.py -i results/scan.json --step 5   # + Fingerprint
+python debug_pipeline.py -i results/scan.json --step 6   # + ExploitabilityAnalysis
+python debug_pipeline.py -i results/scan.json --step 7   # + PayloadMutation
 ```
 `-o <file>` để lưu output ra JSON thay vì chỉ in console.
 
-**Đã phát hiện qua lần chạy đầu tiên (test.har), CHƯA FIX (để dành theo từng bước):**
-- [ ] `har_loader.py` tạo `location: "raw_body"` cho POST body dạng JSON/YAML/XML/raw text, nhưng `postfiltered.py`'s whitelist chỉ chấp nhận `"body"` (thiếu `"raw_body"`) → **mọi raw POST body bị loại bỏ hoàn toàn**, bất kể nội dung. Ảnh hưởng: NodeJS/YAML/raw Java body test case đều mất vì lý do này.
-- [ ] `postfiltered.py`'s generic base64-shape check (`_look_maybe_suspicious`) xóa padding `=` TRƯỚC rồi mới check `len % 4 == 0` — logic sai, vì base64 hợp lệ CÓ padding luôn chia hết 4 ở độ dài GỐC, xóa padding trước sẽ làm hầu hết base64 thật (có padding) fail check này. Ảnh hưởng: Pickle base64 (không có signature riêng, dựa vào check chung này) bị loại oan.
+**Đã phát hiện qua stress test/benchmark, CHƯA FIX (để dành theo từng bước):**
+- [ ] `har_loader.py` tạo `location: "raw_body"` cho POST body dạng JSON/YAML/XML/raw text, nhưng `postfiltered.py`'s whitelist chỉ chấp nhận `"body"` (thiếu `"raw_body"`) → **mọi raw POST body bị loại bỏ hoàn toàn**, bất kể nội dung. Đo được: 2/22 payload benchmark mất vì lý do này.
+- [ ] `postfiltered.py`'s generic base64-shape check (`_look_maybe_suspicious`) xóa padding `=` TRƯỚC rồi mới check `len % 4 == 0` — logic sai, vì base64 hợp lệ CÓ padding luôn chia hết 4 ở độ dài GỐC, xóa padding trước sẽ làm hầu hết base64 thật (có padding) fail check này. Đo được: 6/22 payload benchmark mất vì lý do này (Java/Ruby/NodeJS/Wrapper/YAML gzip-wrapped + Pickle).
+- [x] `cleanfilter.py`'s `PREFIX_PATTERNS[2]` (`^[\w-]{1,32}\s*=\s*`) quá tham lam — base64 ngắn (≤33 ký tự, kết thúc đúng 1 dấu `=` padding) không khớp pattern cụ thể nào trước, bị hiểu nhầm toàn bộ là `tên_biến=` và xóa sạch thành chuỗi rỗng. Chỉ xảy ra khi value TRẦN (không phải multi-cookie header) có đúng 1 dấu `=` ở cuối và phần trước ≤32 ký tự word-char. **Đã fix**: `_clean()` nhận thêm `location`/`name`, chỉ chạy vòng lặp `PREFIX_PATTERNS` khi `location=="header"` và `name` là `"cookie"`/`"set-cookie"` (2 chỗ duy nhất value thật sự có thể chứa `tên=` bên trong) — các location khác value đã trần từ đầu (HAR tách sẵn tên/giá trị), giữ nguyên không bóc gì. Bonus không ngờ: case Content-Disposition (đã ghi nhận trước đây là hạn chế) giờ cũng detect đúng `PHP High` luôn, vì không còn bị `PREFIX_PATTERNS` can thiệp sai vào `form-data; name=...`. Verify bằng `comprehensive.har`: PHP tăng 4→5 (Unknown giảm 27→26), 2 bug còn lại (`raw_body`, base64-padding) không đổi (đúng dự kiến, khác file) — không regression
 - [ ] `Analyze/normalize.py`'s `_generate_decodes()` dùng `.decode('utf-8', errors='ignore')` cho dữ liệu binary tùy ý (Java serialize, Pickle...) — byte không hợp lệ UTF-8 đứng một mình (ví dụ `\xac\xed` — 2 byte đầu magic Java) bị **xóa mất hẳn**, không phải hiển thị sai. Ảnh hưởng: Java payload sau khi giải nén gzip mất đúng 2 byte magic đầu, không detect được (`Unknown/Low`) dù PHP/Ruby/NodeJS/.NET/Wrapper cùng kịch bản đều decode đúng. Bug độc lập, có từ trước, chưa fix
 
 ## 1. Việc kỹ thuật còn thiếu

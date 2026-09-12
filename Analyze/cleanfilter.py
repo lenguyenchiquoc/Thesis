@@ -12,9 +12,11 @@ class cleanfilter:
         r'^Set-Cookie:\s*',
     ]
 
+    COOKIE_HEADER_NAMES = {"cookie", "set-cookie"}
+
     def __init__(self, filter_output):
         self.data = filter_output
-    def _clean(self, value:str) -> str:
+    def _clean(self, value:str, location: str | None = None, name: str | None = None) -> str:
         if not isinstance(value,str) or not value.strip():
             return value
         cleaned = value.strip()
@@ -24,14 +26,19 @@ class cleanfilter:
             suspicious = [s for s in segments if signatures.looks_like_serialized(s)]
             cleaned = suspicious[0] if suspicious else segments[0]
 
-        changed = True
-        while changed:
-            changed = False
-            for pattern in self.PREFIX_PATTERNS:
-                stripped = re.sub(pattern, '', cleaned, flags=re.IGNORECASE).strip()
-                if stripped != cleaned:
-                    cleaned = stripped
-                    changed = True
+        is_raw_cookie_header = (
+            isinstance(location, str) and location.lower() == "header"
+            and isinstance(name, str) and name.lower() in self.COOKIE_HEADER_NAMES
+        )
+        if is_raw_cookie_header:
+            changed = True
+            while changed:
+                changed = False
+                for pattern in self.PREFIX_PATTERNS:
+                    stripped = re.sub(pattern, '', cleaned, flags=re.IGNORECASE).strip()
+                    if stripped != cleaned:
+                        cleaned = stripped
+                        changed = True
 
         cleaned = cleaned.strip('= \t\n\r;,"')
         return cleaned
@@ -40,7 +47,7 @@ class cleanfilter:
         cleaned_vector = []
         for vector in self.data:
             original_value = vector.get('value','')
-            clean_value = self._clean(original_value)
+            clean_value = self._clean(original_value, vector.get('location'), vector.get('name'))
             
             new_vector = vector.copy()
             new_vector["original_value"] = original_value

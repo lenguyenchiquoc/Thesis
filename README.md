@@ -98,6 +98,8 @@ python main.py report -i results/assess_output.json -o results/report_output.jso
 
 Each stage's output is plain JSON and can be inspected manually — see `results/` for examples.
 
+`-o` is optional on every subcommand. If omitted, the output is still saved — under `results/<DDMMYYYY>/<phase>_<HHMMSS>.json` (the date folder is created automatically), so nothing is silently lost when you forget to name an output file.
+
 ## Configuration
 
 Third-party exploitation tools are **not bundled with a fixed absolute path** — paths are resolved through `config.json` at the project root, via `tool_config.py`:
@@ -148,10 +150,12 @@ Utility/
   signatures.py                 shared serialization signatures (single source of
                                  truth for postfiltered.py, cleanfilter.py, finderprint.py)
 
-results/                       example pipeline output at each stage
+results/                       pipeline output, organized as results/<DDMMYYYY>/<phase>_<HHMMSS>.json
+                                when -o isn't given; result1.json/result2.json are real captured lab data
 TestCase/
-  test.har                       fixed regression fixture covering all 8 formats
-  example_multivalue_header.har  illustrative "; "-separated multi-value header cases
+  generate_comprehensive_har.py  regenerates comprehensive.har (reproducible, not a static blob)
+  comprehensive.har               benchmark fixture: ~640 realistic requests (mostly noise) +
+                                   22 malicious payloads covering all 8 formats and known edge cases
 ```
 
 ## Known limitations
