@@ -20,6 +20,12 @@ python debug_pipeline.py -i results/comprehensive_scan.json --step 4   # Normali
 python debug_pipeline.py -i results/comprehensive_scan.json --step 5   # Fingerprint
 ```
 
+**Fix độ thực tế của file benchmark** (user chỉ ra: HAR thật luôn có cookie+header+query+cache cùng lúc trên 1 request, file cũ mỗi malicious entry chỉ set đúng 1 dimension — dễ hơn thực tế, không lẫn payload vào noise thật của cùng request). Sửa `entry()` trong `generate_comprehensive_har.py`:
+- Mọi request giờ luôn có baseline cookies (`_ga`/`cart_id`/`locale`) + full browser headers (Accept/UA/sec-fetch/...) merge với giá trị explicit truyền vào (explicit thắng theo từng key, các key baseline khác vẫn giữ).
+- `cookies` dict và raw header `Cookie` giờ luôn khớp nhau (parse 2 chiều) — giống Chrome thật (cookie xuất hiện đồng thời ở `cookies[]` VÀ raw `Cookie` header, không phải chỉ 1 trong 2).
+- Response giờ có `cookies`/`headers` (Content-Type, Server, X-Powered-By, Cache-Control), `cache.afterRequest` (eTag/hitCount, ~35% request), `content.text` — trước đây toàn để trống `{}`/`[]`.
+- Verify: quét lại `comprehensive.har` (9859 vector, tăng từ noise dày hơn) + `debug_pipeline --step 5`, tất cả nhóm định dạng cũ (PHP/Java/Ruby/DotNet/Wrapper) vẫn detect đúng, các case biết-lỗi (`raw_body`, base64-padding) vẫn miss đúng như cũ — không regression. Regression `result1.json` (data lab thật) không đổi.
+
 **Kết quả benchmark lần chạy đầu (2026-09-12), dùng cho RQ1/RQ2 — có số liệu thật:**
 - Hiệu năng: 642 request → 5935 vector trong 0.94s; PostFilter 0.38s; Normalize 0.36s; Fingerprint 0.40s — không có vấn đề hiệu năng ở quy mô ~6000 vector.
 - Giảm nhiễu: PostFilter giữ 39/5935 vector (99.34% loại bỏ).

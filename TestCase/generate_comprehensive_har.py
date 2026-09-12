@@ -24,12 +24,42 @@ REFERERS = [f"{BASE}/", f"{BASE}/category/electronics", "https://www.google.com/
 STATIC_EXTS = ["jpg", "png", "css", "js", "svg", "gif", "mp4"]
 
 
+def baseline_cookies():
+    return {
+        "_ga": f"GA1.2.{random.randint(10**9, 10**10)}.{1700000000 + random.randint(0, 999999)}",
+        "cart_id": f"c{random.randint(0, 99999999):08d}",
+        "locale": random.choice(["en", "vi", "fr"]),
+    }
+
+
+def _parse_cookie_header(raw: str) -> dict:
+    parsed = {}
+    for part in raw.split("; "):
+        if "=" in part:
+            k, _, v = part.partition("=")
+            parsed[k.strip()] = v.strip()
+    return parsed
+
+
 def entry(url, method="GET", cookies=None, headers=None, query=None,
           post_params=None, post_text=None, post_mime=None, status=200):
-    hdrs = dict(headers or {})
+    # Real browser captures never carry just one dimension (cookies XOR headers
+    # XOR query) — every request has cookies + full browser headers + a raw
+    # Cookie header derived from those same cookies, all present at once.
+    hdrs = dict(common_browser_headers(random.randint(0, 10**6)))
+    hdrs.update(headers or {})
+
+    explicit_cookie_header = next((v for k, v in hdrs.items() if k.lower() == "cookie"), None)
+    if explicit_cookie_header is not None:
+        cookie_map = _parse_cookie_header(explicit_cookie_header)
+    else:
+        cookie_map = dict(baseline_cookies())
+        cookie_map.update(cookies or {})
+        hdrs["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookie_map.items())
+
     req = {
         "method": method, "url": url, "httpVersion": "HTTP/1.1",
-        "cookies": [{"name": k, "value": v} for k, v in (cookies or {}).items()],
+        "cookies": [{"name": k, "value": v} for k, v in cookie_map.items()],
         "headers": [{"name": k, "value": v} for k, v in hdrs.items()],
         "queryString": [{"name": k, "value": v} for k, v in (query or {}).items()],
         "headersSize": -1, "bodySize": -1,
@@ -41,17 +71,44 @@ def entry(url, method="GET", cookies=None, headers=None, query=None,
         if post_text is not None:
             post_data["text"] = post_text
         req["postData"] = post_data
+
+    resp_mime = "application/json" if "application/json" in hdrs.get("Accept", "") else "text/html"
+    resp_headers = {
+        "Content-Type": f"{resp_mime}; charset=utf-8",
+        "Server": "nginx/1.24.0",
+        "Cache-Control": "no-store" if status != 200 else random.choice(["no-cache", "private, max-age=60"]),
+    }
+    if method == "POST" or "/api/" in url:
+        resp_headers["X-Powered-By"] = "Express"
+    resp_cookies = []
+    if random.random() < 0.2:
+        resp_cookies.append({"name": "csrf_token", "value": f"tok{random.randint(0, 10**8):08d}"})
+
+    resp_text = '{"ok":true}' if resp_mime == "application/json" else "<html><body>OK</body></html>"
+
+    cache = {}
+    if random.random() < 0.35:
+        cache = {
+            "afterRequest": {
+                "lastAccess": "2026-09-12T00:00:00.000Z",
+                "eTag": f'"{random.randint(100000, 999999)}"',
+                "hitCount": random.randint(0, 5),
+            }
+        }
+
     return {
         "startedDateTime": "2026-09-12T00:00:00.000Z",
         "time": random.randint(5, 300),
         "request": req,
         "response": {
             "status": status, "statusText": "OK" if status == 200 else "Error",
-            "httpVersion": "HTTP/1.1", "cookies": [], "headers": [],
-            "content": {"size": random.randint(100, 50000), "mimeType": "text/html"},
+            "httpVersion": "HTTP/1.1",
+            "cookies": resp_cookies,
+            "headers": [{"name": k, "value": v} for k, v in resp_headers.items()],
+            "content": {"size": random.randint(100, 50000), "mimeType": resp_mime, "text": resp_text},
             "redirectURL": "", "headersSize": -1, "bodySize": -1,
         },
-        "cache": {}, "timings": {"send": 0, "wait": random.randint(5, 300), "receive": 0},
+        "cache": cache, "timings": {"send": 0, "wait": random.randint(5, 300), "receive": 0},
     }
 
 
