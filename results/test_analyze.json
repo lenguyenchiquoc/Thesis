@@ -5,7 +5,7 @@
         "scan_type": "Hybrid",
         "phase": "analyze",
         "target": "results/test_analyze.json",
-        "timestamp": "2026-09-09T15:21:31.950332"
+        "timestamp": "2026-09-12T09:02:08.955430"
     },
     "summary": {
         "total_vectors": 8
@@ -120,10 +120,11 @@
                 "original_value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA=="
             },
             "normalized": [
+                "¬í\u0000\u0005sr\u0000\u0011java.util.HashMap",
                 "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA"
             ],
             "fingerprint": {
-                "value": "rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA",
+                "value": "¬í\u0000\u0005sr\u0000\u0011java.util.HashMap rO0ABXNyABFqYXZhLnV0aWwuSGFzaE1hcA",
                 "type": "Java",
                 "confidence": "High",
                 "risk_level": "High",
@@ -131,7 +132,7 @@
                 "gadget_detected": false,
                 "gadget_hints": [],
                 "all_candidates": {
-                    "Java": 10
+                    "Java": 16
                 }
             },
             "exploit_analysis": {

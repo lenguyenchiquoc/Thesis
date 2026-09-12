@@ -46,7 +46,7 @@ class Fingerprint:
         raw_text   = " ".join(self.data)
         lower_text = raw_text.lower()
         bin_data   = b" ".join(
-            item.encode('utf-8', errors='ignore') for item in self.data
+            item.encode('latin-1', errors='ignore') for item in self.data
         )
         clean_text = lower_text.replace('\x00', ' ').replace('\x05', ' ').replace('\x04', ' ')
 

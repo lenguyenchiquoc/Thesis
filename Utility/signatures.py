@@ -164,7 +164,7 @@ def looks_like_serialized(value: str) -> bool:
         decoded_value = value
         decoded_lower = value_lower
 
-    bin_data = value.encode('utf-8', errors='ignore')
+    bin_data = value.encode('latin-1', errors='ignore')
     if any(magic in bin_data for magic in JAVA_MAGIC_BYTES + PICKLE_MAGIC_BYTES + RUBY_MAGIC_BYTES):
         return True
 

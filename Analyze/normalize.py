@@ -59,14 +59,14 @@ class DataNormalizer:
                 if decoded_bytes.startswith(b'\x1f\x8b'):
                     try:
                         decompressed = gzip.decompress(decoded_bytes)
-                        txt = decompressed.decode('utf-8', errors='ignore').strip()
+                        txt = decompressed.decode('latin-1').strip()
                         if txt:
                             results.append(txt)
                     except:
                         pass
                 else:
                     try:
-                        txt = decoded_bytes.decode('utf-8', errors='ignore').strip()
+                        txt = decoded_bytes.decode('latin-1').strip()
                         if txt and len(txt) >= 10:
                             results.append(txt)
                     except:
@@ -76,7 +76,7 @@ class DataNormalizer:
         if re.fullmatch(r'^[0-9a-fA-F]+$', value) and len(value) % 2 == 0 and len(value) >= 16:
             try:
                 hex_bytes = bytes.fromhex(value)
-                txt = hex_bytes.decode('utf-8', errors='ignore').strip()
+                txt = hex_bytes.decode('latin-1').strip()
                 if txt:
                     results.append(txt)
             except:
@@ -98,7 +98,7 @@ class DataNormalizer:
 
         if any(re.search(p, value) for p in signatures.DOTNET_VIEWSTATE):
             score += 6
-        if any(magic in value.encode('utf-8', errors='ignore') for magic in signatures.RUBY_MAGIC_BYTES):
+        if any(magic in value.encode('latin-1', errors='ignore') for magic in signatures.RUBY_MAGIC_BYTES):
             score += 6
         if any(re.search(p, value, re.IGNORECASE) for p in signatures.DOTNET_PATTERNS):
             score += 4
