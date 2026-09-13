@@ -1,3 +1,4 @@
+import base64
 import re
 import urllib.parse
 
@@ -203,8 +204,13 @@ def looks_like_serialized(value: str) -> bool:
             return True
 
     value_clean = value.replace('%3d', '=').replace('%3D', '=').replace('-', '+').replace('_', '/').rstrip('=')
-    if len(value_clean) > 40 and len(value_clean) % 4 == 0 and re.match(r'^[A-Za-z0-9+/=]{20,}$', value_clean):
-        return True
+    if len(value_clean) > 40 and re.match(r'^[A-Za-z0-9+/]{20,}$', value_clean):
+        padded = value_clean + '=' * (-len(value_clean) % 4)
+        try:
+            base64.b64decode(padded, validate=True)
+            return True
+        except Exception:
+            pass
 
     if re.match(r'^[0-9a-fA-F]{30,}$', value):
         return True
