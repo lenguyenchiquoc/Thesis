@@ -105,10 +105,11 @@ class Fingerprint:
         weak_hits = sum(1 for p in self.PHP_WEAK if re.search(p, raw))
         score += min(weak_hits, 2)
 
-        for m in re.finditer(r's:(\d+):"([^"]*)"', raw):
+        for m in re.finditer(r's:(\d+):"', raw):
             declared = int(m.group(1))
-            actual   = len(m.group(2))
-            if declared == actual:
+            start    = m.end()
+            end      = start + declared
+            if end < len(raw) and raw[end] == '"':
                 score += 3
                 break
             else:
