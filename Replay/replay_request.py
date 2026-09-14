@@ -92,6 +92,9 @@ class ReplayRequest:
             if value is not None:
                 body = urllib.parse.urlencode({name: value}).encode()
                 headers["Content-Type"] = "application/x-www-form-urlencoded"
+        elif location == "raw_body":
+            if value is not None:
+                body = value.encode("utf-8", errors="replace")
 
         if cookies:
             headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())

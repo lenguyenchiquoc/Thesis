@@ -60,7 +60,7 @@ class VectorFiltering:
             value = vector.get("value")
             if not isinstance(value, str) or not value.strip():
                 continue
-            if location not in ["cookie", "body", "header", "query", "form_body", "url_param"]:
+            if location not in ["cookie", "body", "header", "query", "form_body", "url_param", "raw_body"]:
                 continue
             if location == "header" and name in self.Ignore_header_name:
                 continue
